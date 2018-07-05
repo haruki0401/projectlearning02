@@ -241,7 +241,6 @@ public class Ser {
 						 
 						FileOutputStream outFile = new FileOutputStream("group.obj");
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-						g.setchat("グループ"+g+"が開設されました");
 						outObject.writeObject(a);
 						outObject.close();
 						outFile.close();
@@ -297,6 +296,9 @@ public class Ser {
 						User ques=obj(name);//質問者のオブジェクト確保
 						
 						Question p=new Question(user,a,group);
+						
+						Group g=chat(group);
+						g.setchat(p);
 						
 						FileOutputStream outFile = new FileOutputStream("Question.obj");
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
@@ -358,8 +360,11 @@ public class Ser {
 					if(inputLine.equals("回答")) {
 						a = br[playerNo].readLine();//回答の取得
 						Question k=ques(b);
+						String group=hashA2.get(playerNo);
 						if(k!=null) {
 						 k.setAnswer(a);
+						 Group g=chat(group);
+							g.setchat(k);
 						
 						qnew(k);
 						}
