@@ -1,92 +1,137 @@
-public class User {
+package pro2;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+
+
+public class User implements Serializable {
 	private String name;
-	private String password;
-	private String address;
-	private double value=0;
-	private int question=0, answer=0;
+	private String pass;
+	private String ai;
 	private String job;
 	private String belong;
-	private String group;
-	private int coin=0;
+	private double value;
+	private int question;
+	private int answer;
+	ArrayList group;
 
-	public User(String name, String password){
-		this.name = name;
-		this.password = password;
+
+
+	User(String name,String pass,String ai,String job,String syozoku,double value,int question,int answer,ArrayList group){
+		this.name=name;
+		this.pass=pass;
+		this.ai=ai;
+		this.job=job;
+		this.belong=belong;
+		this.value=value;
+		this.question=question;
+		this.answer=answer;
+		this.group=group;
+		
+		
 	}
+
+
 
 	public String getName(){
+
 		return name;
+
 	}
+
+
 
 	public String getPassword(){
-		return password;
+
+		return pass;
+
 	}
 
-	public void setAddress(String s){
-		address = s;
+	public String getAikotoba() {
+		return ai;
 	}
 
-	public String getAddress(){
-		return address;
-	}
-
-	public void setValue(double v){
-		value = v;
-	}
-
-	public double getValue(){
-		return value;
-	}
-
-	public void setQuestion(int n){
-		question = n;
-	}
-
-	public int getQuestion(){
-		return question;
-	}
-
-	public void setAnswer(int n){
-		answer = n;
-	}
-
-	public int getAnswer(){
-		return answer;
-	}
 
 	public void setJob(String s){
+
 		job = s;
+
 	}
+
+
 
 	public String getJob(){
+
 		return job;
+
+	}
+	
+	public void setBelong(String s){
+
+		belong = s;
+
 	}
 
-	public void setBelong(String s){
-		belong = s;
-	}
+
 
 	public String getBelong(){
+
 		return belong;
+
 	}
 
-	public void setGroup(String s){
-		group = s;
+
+
+	public double getValue(){
+
+		return value;
+
 	}
 
-	public String getGroup(){
+
+
+	public void setQuestion(int n){
+
+		question = n;
+
+	}
+
+
+
+	public int getQuestion(){
+
+		return question;
+
+	}
+
+
+
+	public void setAnswer(int n){
+
+		answer = n;
+
+	}
+
+
+
+	public int getAnswer(){
+
+		return answer;
+
+	}
+
+
+
+
+
+
+	public ArrayList getGroup(){
+
 		return group;
+
 	}
 
-	public void setCoin(int n){
-		coin = n;
-	}
 
-	public void renewCoin(int n) {
-		coin += n;
-	}
 
-	public int getCoin(){
-		return coin;
-	}
 }
