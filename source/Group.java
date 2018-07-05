@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Group {
 		String gname;//グループ名
-		static ArrayList<String> chat = new ArrayList<String>();
+		static ArrayList<Question> chat = new ArrayList<Question>();
 		static ArrayList<String> member = new ArrayList<String>();
 		
 		Group(String gname){
@@ -17,7 +17,7 @@ public class Group {
 		}
 		
 		
-		public void setchat(String bun) { 
+		public void setchat(Question bun) { 
 			chat.add(bun);//チャット情報を保持するgroupに格納
 			
 			if(chat.size()>100) {
