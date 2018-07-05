@@ -1,8 +1,9 @@
 package pro2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Group {
+public class Group implements Serializable{
 		String gname;//グループ名
 		static ArrayList<Question> chat = new ArrayList<Question>();
 		static ArrayList<String> member = new ArrayList<String>();
