@@ -237,7 +237,8 @@ public class Ser {
 					///グループ化チャット機能
 					if(inputLine.equals("グループ作成")) {
 						a = br[playerNo].readLine();//グループ名//同じ名前はだめにしようと思っている
-						Group g=new Group(a);
+						b = br[playerNo].readLine();//グループの説明文
+						Group g=new Group(a,b);
 						 
 						FileOutputStream outFile = new FileOutputStream("group.obj");
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
@@ -966,12 +967,19 @@ if(syoki!=null) {
 		String pass=hashD1.get(name);
 		String ai=hashD5.get(name);
 		String job=hashD3.get(name);
-		String syozoku=hashD4.get(name);
+		String belong=hashD4.get(name);
 		double eval=hashC1.get(name);
 		int qcount=hashC2.get(name);
 		int acount=hashC3.get(name);
-		ArrayList gru=hashC4.get(name);
-		User pl=new User(name,pass,ai,job,syozoku,eval,qcount,acount,gru);
+		ArrayList<String> gru=hashC4.get(name);
+		User pl=new User(name,pass,ai);
+		pl.setJob(job);
+		pl.setBelong(belong);
+		pl.setValue(eval);
+		pl.setQuestion(qcount);
+		pl.setAnswer(acount);
+		pl.setGroup(gru);
+		
 		
 		return pl;
 		
