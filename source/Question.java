@@ -1,86 +1,190 @@
+package pro2;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Question {
-	private User questioner;		//¿–âÒ
-	private User answerer;		//‰ñ“šÒ
-	private User offered;			//ƒIƒtƒ@[‚³‚ê‚½l
-	private String question;		//¿–â“à—e
-	private String answer;			//‰ñ“š“à—e
-	private String group;			//¿–âÒ‚Ì‘®‚·‚éƒOƒ‹[ƒv
-	private ArrayList<User> candidates;		//—§Œó•âÒ‚ÌƒŠƒXƒg
-	private boolean answered = false;		//‰ñ“š‚³‚ê‚½‚©‚Ç‚¤‚©
-	private double value=0;				//‰ñ“š‚Ì•]‰¿’l
-	private int coin;				//¿–â‚É‚©‚¯‚ç‚ê‚½ƒRƒCƒ“
+
+public class Question implements Serializable {
+
+	
+	private User questioner;		//è³ªå•è€…
+
+	private User answerer;		//å›ç­”è€…
+
+	private User offer;			//ã‚ªãƒ•ã‚¡ãƒ¼ã—ãŸäºº
+
+	private String question;		//è³ªå•å†…å®¹
+
+	private String answer;			//å›ç­”å†…å®¹
+
+	private String group;			//è³ªå•è€…ã®å±ã™ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—
+
+	private ArrayList<User> candidates= new ArrayList<User>();;		//ç«‹å€™è£œè€…ã®ãƒªã‚¹ãƒˆ
+
+	private boolean answered = false;		//å›ç­”ã•ã‚ŒãŸã‹ã©ã†ã‹
+
+	private double value=0;				//å›ç­”ã®è©•ä¾¡å€¤
+
+	private int coin;				//è³ªå•ã«ã‹ã‘ã‚‰ã‚ŒãŸã‚³ã‚¤ãƒ³
+	
+	
+
+
+
 
 	public Question(User questioner, String question, String group) {
+
 		this.questioner = questioner;
+
 		this.question = question;
+
 		this.group = group;
+
 	}
+
+
 
 	public void setCandidates(User candidate) {
+
 		candidates.add(candidate);
+
 	}
 
-	public void setOffered(User s) {
-		offered = s;
-	}
 
-	public void setAnswer(User user, String ans) {
+
+	public void setOffer(User s) {
+
+		offer = s;
+		
+
+	}
+	
+
+
+
+	public void setAnswerer(User user) {
+
 		answerer = user;
-		answer = ans;
-		answered = true;
+
+		
+
 	}
+	public void setAnswer(String s) {
+		answer=s;
+		answered=true;
+		
+	}
+
+
 
 	public void setValue(double v) {
+
 		value = v;
+
 	}
+
+
 
 	public void renewValue(double newv) {
+
 		value = (value + newv) / 2;
+
 	}
+
+
 
 	public void setCoin(int c) {
+
 		coin = c;
+
 	}
+
+
 
 	public User getQuestioner() {
+
 		return questioner;
+
 	}
+
+
 
 	public String getQuestion() {
+
 		return question;
+
 	}
+
+
 
 	public String getGroup() {
+
 		return group;
+
 	}
+
+
 
 	public User getAnswerer() {
+
 		return answerer;
+
 	}
+
+
 
 	public String getAnswer() {
+
 		return answer;
+
 	}
+
+
 
 	public ArrayList<User> getCandidates(){
+
 		return candidates;
+
 	}
+	
+	public void clearCandidates() {
+		candidates.clear();
+	}
+
+
 
 	public User getOffered() {
-		return offered;
+
+		return offer;
+
 	}
+
+
 
 	public double getValue() {
+
 		return value;
+
 	}
+
+
 
 	public int getCoin() {
+
 		return coin;
+
 	}
 
+
+
 	public boolean checkAnswered() {
+
 		return answered;
+
 	}
+
+
+
+
+
 }
