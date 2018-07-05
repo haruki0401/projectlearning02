@@ -1,3 +1,12 @@
+package com.example.tomoko.testapplication;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Intent;
+import android.os.AsyncTask;
+
+import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,263 +15,447 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 
-public class Client {
-	private Socket soc;
-	private PrintWriter out;
-	private BufferedReader in;
-	private ObjectOutputStream oos;
-	private ObjectInputStream ois;
-	private User myuser;
 
-	public void sendUserInformation(String job, String belong, String group){		//ƒAƒJƒEƒ“ƒgî•ñ“]‘—
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(job);
-			out.println(belong);
-			out.println(group);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+import static java.lang.Integer.parseInt;
 
-	public void receiveUserInformation() {		//©•ª‚ÌƒAƒJƒEƒ“ƒgî•ñ‚ğæ“¾
-		User u = null;
-		try {
-			ois = new ObjectInputStream(soc.getInputStream());
-			u = (User) ois.readObject();
-			myuser = u;
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+public class Client extends Application{
+    private Socket soc;
+    private PrintWriter out;
+    private BufferedReader in;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private User myuser;
+    String ipAddress;
+    int port;
+    UserSupport us;
+    Activity activity;
+    boolean f;
 
-	public void creatGroup(String group, String explanation) {		//ƒOƒ‹[ƒvV‹Kì¬
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(group);
-			out.println(explanation);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
 
-	public User[] receiveOtherUserInformation() {		//‘¼ƒ†[ƒU‚Ìî•ñ‚ğæ“¾
-		User[] u = null;
-		int member = 0;
-		try {
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			member = Integer.parseInt(in.readLine());
-			ois = new ObjectInputStream(soc.getInputStream());
-			for(int i=0; i<member; i++) {
-				u[i] = (User) ois.readObject();
-			}
-		} catch (IOException | ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return u;
-	}
+    public void onCreate() {
+        super.onCreate();
 
-	public Question[] receiveQuestions(String group) {		//ƒOƒ‹[ƒv“à‚Ì¿–â‚ğæ“¾
-		Question q[] = null;
-		int number = 0;
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(group);
-			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			number = Integer.parseInt(in.readLine());
-			ois = new ObjectInputStream(soc.getInputStream());
-			for(int i=0; i<number; i++) {
-				q[i] = (Question) ois.readObject();
-			}
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return q;
-	}
+        myuser = new User();
+    }
 
-	public void sendQuestion(String question/*¿–â“à—e*/, String answerer/*ƒIƒtƒ@[‚ğo‚·‘Šè*/, int coin) {		//¿–â‚Ì‘—M
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(myuser.getName());
-			out.println(myuser.getGroup());
-			out.println(question);
-			if(answerer.equals(null)==false)sendOffer(answerer);
-			out.println(coin);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
 
-	public void sendOffer(String answerer/*ƒIƒtƒ@[‚ğo‚·‘Šè*/) {		//ƒIƒtƒ@[‚Ì‘—M
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(answerer);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+    public void connectServer(String ipAddress, String port, final Activity activity) {//ã‚µãƒ¼ãƒã¨ã®æ¥ç¶š
+        this.activity = activity;
+        final String ipaddress = ipAddress;
+        //final int portnum = Integer.parseInt(port);
 
-	public Question receiveAnswer() {		//©•ª‚ª‚µ‚½¿–âî•ñ‚Ìæ“¾B‰ñ“šA—§Œó•âÒ“™‚Ìî•ñ‚Í‚±‚±‚©‚çæ‚èo‚·B
-		Question q = null;
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(myuser.getName());
-			out.flush();
-			ois = new ObjectInputStream(soc.getInputStream());
-			q = (Question) ois.readObject();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return q;
-	}
+        new AsyncTask<String, Void, String>() {
 
-	public Question[] receiveOffer() {		//©•ª‚É—ˆ‚Ä‚¢‚éƒIƒtƒ@[‚ÌóM
-		Question[] q = null;
-		int number = 0;
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(myuser.getName());
-			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			number = Integer.parseInt(in.readLine());
-			ois = new ObjectInputStream(soc.getInputStream());
-			for(int i=0; i<number; i++) {
-				q[i] = (Question) ois.readObject();
-			}
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return q;
-	}
+            @Override
+            protected String doInBackground(String... strings) {
+                try {
+                    soc = new Socket(strings[0], Integer.parseInt(strings[1]));
+                } catch (UnknownHostException e) {
+                    System.out.println("ãƒ›ã‚¹ãƒˆã«æ¥ç¶šã§ãã¾ã›ã‚“ã€‚");
+                    System.out.println(e);
+                    return "ãƒ›ã‚¹ãƒˆã«æ¥ç¶šã§ãã¾ã›ã‚“";
+                } catch (IOException e) {
+                    System.out.println("ã‚µãƒ¼ãƒãƒ¼æ¥ç¶šæ™‚ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚");
+                    System.out.println(e);
+                    e.printStackTrace();
+                    return "ã‚µãƒ¼ãƒæ¥ç¶šæ™‚ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚";
+                }
 
-	public void sendAnswer(String question/*¿–â“à—e*/, String answer/*‰ñ“š“à—e*/) {		//‰ñ“š‚Ì‘—M
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(question);
-			out.println(answer);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+                return "æ¥ç¶šæˆåŠŸ";
+            }
 
-	public void Candidacy(String question/*¿–â“à—e*/) {		//—§Œó•â
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(question);
-			out.println(myuser.getName());
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                TextView tv = (TextView)activity.findViewById(R.id.result_text);
+                Button loginbutton = (Button)activity.findViewById(R.id.go_login_button);
+                tv.setText(s);
+                if(s.equals("æ¥ç¶šæˆåŠŸ")) {
+                loginbutton.setVisibility(loginbutton.VISIBLE);}
 
-	public void sendValue(String question/*¿–â“à—e*/, double value/*•]‰¿’l*/) {		//•]‰¿’l‚Ì‘—M
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(question);
-			out.println(value);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
+            }
+        }.execute(ipAddress, port);
+    }
 
-	public void cancelOffer(String question/*¿–â“à—e*/) {		//ƒIƒtƒ@[æ‚èÁ‚µ
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(question);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
 
-	public void refuseOffer(String question/*¿–â“à—e*/) {		//ƒIƒtƒ@[‹‘”Û
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(question);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
 
-	public String receiveMessage() {		//ƒƒbƒZ[ƒWóM
-		String mes = null;
-		try {
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			mes = in.readLine();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return mes;
-	}
 
-	public void sendCoin(int coin) {		//‘—‹à
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println(coin);
-			out.flush();
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-	}
 
-	public int receiveCoin() {		//’…‹à
-		int c = 0;
-		try {
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			c = Integer.parseInt(in.readLine());
-		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
-			e.printStackTrace();
-		}
-		return c;
-	}
 
-	public User getMyUser() {
-		return myuser;
-	}
 
-	public static void main(String[] args) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
 
-	}
+    public boolean loginRequest(String userName, String password, final Activity activity) { //ãƒ­ã‚°ã‚¤ãƒ³è¦æ±‚
+        this.activity = activity;
+        f = true;
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... strings) {
+                try{
+                    in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+                    out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+                    out.println("èªè¨¼");//åˆè¨€è‘‰
+                    out.println(strings[0]);
+                    out.println(strings[1]);
+                    out.flush();
+                    String isPer = in.readLine();
+                    System.out.println(isPer);
+                    if (isPer.equals("permit") == true) {  //ãƒ­ã‚°ã‚¤ãƒ³èªè¨¼ã•ã‚ŒãŸ
+                        f = true;
+                        return "ãƒ­ã‚°ã‚¤ãƒ³æˆåŠŸ";
+                    } else if (isPer.equals("notPermit") == true) {  //ãƒ­ã‚°ã‚¤ãƒ³èªè¨¼ã•ã‚Œãªã‹ã£ãŸ
+                        f = false;
+                        return "ãƒ­ã‚°ã‚¤ãƒ³å¤±æ•—";
+                    } else {
+                        System.out.println("èªè¨¼ã¨ã¯åˆ¥ã®æ–‡å­—åˆ—ã§ã™ã€‚");  //åˆ¥ã®æ–‡å­—åˆ—ãŒé€ã‚‰ã‚Œã¦ããŸ
+                        f = false;
+                        return "ãƒ­ã‚°ã‚¤ãƒ³å¤±æ•—";
+                    }
+                    //ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’ã‚¯ãƒ­ãƒ¼ã‚ºã™ã‚‹
+                    //out.close();
+                    //in.close();
+                } catch(
+                        IOException e)
+
+                {
+                    System.out.println(e);
+                }
+                f = false;
+                return "ãƒ­ã‚°ã‚¤ãƒ³å¤±æ•—";
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+
+                if(s.equals("ãƒ­ã‚°ã‚¤ãƒ³æˆåŠŸ")) {
+
+                    Intent intent = new Intent(activity.getApplication(), HomeActivity.class);
+                    startActivity(intent);
+                }
+            }
+        }.execute(userName,password);
+        return f;
+    }
+
+    public boolean accountRequest(String userName,String password, String password2, Activity activity) { //ã‚¢ã‚«ã‚¦ãƒ³ãƒˆä½œæˆè¦æ±‚
+        this.activity = activity;
+        final Activity act = activity;
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... strings) {
+                try {
+                    out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+                    in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+                    out.println("æ–°è¦ç™»éŒ²");
+                    out.println(strings[0]);
+                    out.println(strings[1]);
+                    out.println(strings[2]);
+                    out.flush();
+                    String isPer = in.readLine();
+                    if (isPer.equals("rtrue"/*"permit"*/) == true) {  //æ–°è¦ä½œæˆã§ãã‚‹
+                        return "ç™»éŒ²æˆåŠŸ";
+                    } else if (isPer.equals("rfalse"/*"notPermit"*/) == true) {  //æ–°è¦ä½œæˆã§ããªã„
+                        return "ç™»éŒ²å¤±æ•—";
+                    } else {
+                        System.out.println("ç¢ºèªã¨ã¯åˆ¥ã®æ–‡å­—åˆ—ã§ã™ã€‚");  //åˆ¥ã®æ–‡å­—åˆ—ãŒé€ã‚‰ã‚Œã¦ããŸ
+                    }
+                    //out.close();
+                    //in.close();
+                }catch(
+                        IOException e)
+
+                {
+                    System.out.println(e);
+                }
+                return "ç™»éŒ²å¤±æ•—";
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                if(s.equals("ç™»éŒ²æˆåŠŸ")) {
+                    Intent intent = new Intent(act.getApplication(), HomeActivity.class);
+                    startActivity(intent);
+                }
+            }
+
+        }.execute(userName,password, password2);
+        return true;
+    }
+
+
+    public void sendUserInformation(String job, String belong, ArrayList<String> group){		//ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±è»¢é€
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(myuser.getName());		//è‡ªåˆ†ã®Userã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚µãƒ¼ãƒã§æ¢ã—ã¦ã‚‚ã‚‰ã†ãŸã‚ã®ã‚­ãƒ¼(åå‰)ã®è»¢é€
+            out.println(job);
+            out.println(belong);
+            out.flush();
+            for(String s: group) {
+                out.println(s);
+                out.flush();
+            }
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void receiveUserInformation() {		//è‡ªåˆ†ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã‚’å–å¾—
+        User u;
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(myuser.getName());		//è‡ªåˆ†ã®Userã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚µãƒ¼ãƒã§æ¢ã—ã¦ã‚‚ã‚‰ã†ãŸã‚ã®ã‚­ãƒ¼(åå‰)ã®è»¢é€
+            ois = new ObjectInputStream(soc.getInputStream());
+            u = (User) ois.readObject();		//ã‚µãƒ¼ãƒã‹ã‚‰å—ã‘å–ã£ãŸè‡ªåˆ†ã®Userã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+            myuser = u;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void creatGroup(String group/*ã‚°ãƒ«ãƒ¼ãƒ—å*/, String explanation/*ã‚°ãƒ«ãƒ¼ãƒ—ã®èª¬æ˜*/) {		//ã‚°ãƒ«ãƒ¼ãƒ—æ–°è¦ä½œæˆ
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(group);
+            out.println(explanation);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<User> receiveOtherUserInformation(String group) throws ClassNotFoundException {		//åŒã‚°ãƒ«ãƒ¼ãƒ—ã®ä»–ãƒ¦ãƒ¼ã‚¶ã®æƒ…å ±ã‚’å–å¾—
+        ArrayList<User> groupmember = new ArrayList<User>();
+        int number;		//ãƒ¡ãƒ³ãƒãƒ¼æ•°
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(group);		//ã©ã®ã‚°ãƒ«ãƒ¼ãƒ—ã®ãƒ¡ãƒ³ãƒãƒ¼ã‹ã‚’ã‚µãƒ¼ãƒãŒæ¢ã™ãŸã‚ã®ã‚­ãƒ¼(ã‚°ãƒ«ãƒ¼ãƒ—å)ã®è»¢é€
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            number = parseInt(in.readLine());		//ãƒ¡ãƒ³ãƒãƒ¼æ•°
+            ois = new ObjectInputStream(soc.getInputStream());
+            for(int i=0; i<number; i++) {
+                groupmember.add((User) ois.readObject());
+            }
+            return groupmember;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<Question> receiveQuestions(String group) {		//ã‚°ãƒ«ãƒ¼ãƒ—å†…ã®è³ªå•ã‚’å–å¾—
+        ArrayList<Question> groupquestion = new ArrayList<Question>();
+        int number;		//è³ªå•æ•°
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(group);
+            out.flush();
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            number = parseInt(in.readLine());
+            ois = new ObjectInputStream(soc.getInputStream());
+            for(int i=0; i<number; i++) {
+                groupquestion.add((Question)ois.readObject());
+            }
+            return groupquestion;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void sendQuestion(String question/*è³ªå•å†…å®¹*/, String answerer/*ã‚ªãƒ•ã‚¡ãƒ¼ã‚’å‡ºã™ç›¸æ‰‹*/, int coin) {		//è³ªå•ã®é€ä¿¡
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(myuser.getName());		//è³ªå•è€…ã®åå‰ã®é€ä¿¡
+            out.println(myuser.getGroup());		//è³ªå•ã®å±ã™ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—åã®é€ä¿¡
+            out.println(question);				//è³ªå•å†…å®¹ã®é€ä¿¡
+            if(answerer.equals(null)==false)sendOffer(question, answerer);		//ã‚ªãƒ•ã‚¡ãƒ¼ç›¸æ‰‹ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆã€ã‚ªãƒ•ã‚¡ãƒ¼ã‚’é€ã‚‹
+            out.println(coin);					//è³ªå•ã«ã‹ã‘ã‚‰ã‚ŒãŸã‚³ã‚¤ãƒ³æ•°ã®é€ä¿¡
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void sendOffer(String question/*è³ªå•å†…å®¹*/, String answerer/*ã‚ªãƒ•ã‚¡ãƒ¼ã‚’å‡ºã™ç›¸æ‰‹*/) {		//ã‚ªãƒ•ã‚¡ãƒ¼ã®é€ä¿¡
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);		//ã©ã®è³ªå•ã«å¯¾ã™ã‚‹ã‚ªãƒ•ã‚¡ãƒ¼ã‹ã‚’è­˜åˆ¥ã™ã‚‹ãŸã‚ã®ã‚­ãƒ¼ï¼ˆè³ªå•å†…å®¹ï¼‰ã®é€ä¿¡
+            out.println(answerer);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Question> receiveAnswer() {		//è‡ªåˆ†ãŒã—ãŸè³ªå•æƒ…å ±ã®å–å¾—ã€‚å›ç­”ã€ç«‹å€™è£œè€…ç­‰ã®æƒ…å ±ã¯ã“ã“ã‹ã‚‰å–ã‚Šå‡ºã™ã€‚
+        ArrayList<Question> myquestion = new ArrayList<Question>();
+        int number;
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(myuser.getName());		//èª°ã®è³ªå•ã‹ã‚’åˆ¤åˆ¥ã™ã‚‹ãŸã‚ã®ã‚­ãƒ¼ï¼ˆè‡ªåˆ†ã®åå‰ï¼‰ã®é€ä¿¡
+            out.flush();
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            number = parseInt(in.readLine());
+            ois = new ObjectInputStream(soc.getInputStream());
+            for(int i=0; i<number; i++) {
+                myquestion.add((Question) ois.readObject());
+            }
+            return myquestion;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<Question> receiveOffer() {		//è‡ªåˆ†ã«æ¥ã¦ã„ã‚‹ã‚ªãƒ•ã‚¡ãƒ¼ã®å—ä¿¡ï¼ˆå…·ä½“çš„ã«ã¯ã€Questionã‚¯ãƒ©ã‚¹ã®å±æ€§offeredã«è‡ªåˆ†ã®åå‰ãŒã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚‹Questionã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å—ä¿¡ï¼‰
+        ArrayList<Question> offer = new ArrayList<Question>();
+        int number;
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(myuser.getName());		//æ¡ä»¶ã«åˆè‡´ã™ã‚‹è³ªå•ã‚’è­˜åˆ¥ã™ã‚‹ãŸã‚ã®ã‚­ãƒ¼ï¼ˆè‡ªåˆ†ã®åå‰ï¼‰ã®é€ä¿¡
+            out.flush();
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            number = parseInt(in.readLine());
+            ois = new ObjectInputStream(soc.getInputStream());
+            for(int i=0; i<number; i++) {
+                offer.add((Question) ois.readObject());
+            }
+            return offer;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void sendAnswer(String question/*è³ªå•å†…å®¹*/, String answer/*å›ç­”å†…å®¹*/) {		//å›ç­”ã®é€ä¿¡
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);
+            out.println(answer);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void Candidacy(String question/*è³ªå•å†…å®¹*/) {		//ç«‹å€™è£œ
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);
+            out.println(myuser.getName());		//ç«‹å€™è£œè€…ï¼ˆè‡ªåˆ†ã®åå‰ï¼‰ã®é€ä¿¡ã€‚
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void sendValue(String question/*è³ªå•å†…å®¹*/, double value/*è©•ä¾¡å€¤*/) {		//è©•ä¾¡å€¤ã®é€ä¿¡
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);
+            out.println(value);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelOffer(String question/*è³ªå•å†…å®¹*/) {		//ã‚ªãƒ•ã‚¡ãƒ¼å–ã‚Šæ¶ˆã—
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public void refuseOffer(String question/*è³ªå•å†…å®¹*/) {		//ã‚ªãƒ•ã‚¡ãƒ¼æ‹’å¦
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(question);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public String receiveMessage() {		//ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡
+        String mes;
+        try {
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            mes = in.readLine();
+            return mes;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void sendCoin(int coin) {		//é€é‡‘
+        try {
+            out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+            out.println(coin);
+            out.flush();
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+    }
+
+    public int receiveCoin() {		//ç€é‡‘
+        int c;
+        try {
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+            c = parseInt(in.readLine());
+            return c;
+        } catch (IOException e) {
+            // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public User getMyUser() {
+        return myuser;
+    }
+
+    public static void main(String[] args) {
+        // TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
+
+    }
 
 }
