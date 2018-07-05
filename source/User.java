@@ -9,25 +9,21 @@ public class User implements Serializable {
 	private String name;
 	private String pass;
 	private String ai;
-	private String job;
-	private String belong;
-	private double value;
-	private int question;
-	private int answer;
-	ArrayList group;
+	private String job="";
+	private String belong="";
+	private double value=0;
+	private int question=0;
+	private int answer=0;
+	ArrayList<String> group;
+	
 
 
 
-	User(String name,String pass,String ai,String job,String syozoku,double value,int question,int answer,ArrayList group){
+	User(String name,String pass,String ai){
 		this.name=name;
 		this.pass=pass;
 		this.ai=ai;
-		this.job=job;
-		this.belong=belong;
-		this.value=value;
-		this.question=question;
-		this.answer=answer;
-		this.group=group;
+		group.add("all");
 		
 		
 	}
@@ -88,6 +84,9 @@ public class User implements Serializable {
 		return value;
 
 	}
+	public void setValue(double u) {
+		value=u;
+	}
 
 
 
@@ -130,6 +129,9 @@ public class User implements Serializable {
 
 		return group;
 
+	}
+	public void setGroup(ArrayList a) {
+		group=a;
 	}
 
 
