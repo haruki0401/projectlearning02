@@ -53,13 +53,13 @@ public class Ser {
 	static HashMap<String, ArrayList> hashC4 = new HashMap<>();//名前、グループ
 	
 	static HashMap<Integer,String> hashA1 = new HashMap<>();//playerNo,名前
-	static HashMap<Integer,String> hashA2 = new HashMap<>();//playerNo,今入室しているグループ（普段は全体ってことでall）
+	
 	
 	static HashMap<String, String> hashA8 = new HashMap<>();//二人で情報をやり取りするための紐づけ
 
 	
 	
-	static ArrayList<String> syoki = new ArrayList<String>();
+	
 	
 	
 	
@@ -147,6 +147,8 @@ public class Ser {
 
 					String c = "";
 					
+					String d="";
+					
 					if(inputLine.equals("認証")) {
 
 						a = br[playerNo].readLine();
@@ -202,8 +204,11 @@ public class Ser {
 
 						if((str = forgetman(a, b)) != null) {
 
-							forwardMessage("ftrue" + str, playerNo);
+							forwardMessage("ftrue" , playerNo);
+							forwardMessage(str, playerNo);
 
+						}else {
+							forwardMessage("ffalse",playerNo);
 						}
 
 					}
@@ -217,14 +222,98 @@ public class Ser {
 
 					}
 					
+					
 					if(inputLine.equals("個人情報")) {
 						
 						a = br[playerNo].readLine();//職業
 
 						b = br[playerNo].readLine();//所属
 						
+						c=br[playerNo].readLine();//グループ数
+						
+						int kazu=Integer.parseInt(c);
+						User u=obj(hashA1.get(playerNo));
+						
+						for(String s:obj(hashA1.get(playerNo)).getGroup()) {
+								
+						
+							Group g=null;
+							FileInputStream inFile1 = new FileInputStream("Group.obj");
+							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+							
+							while(true) {
+								
+								try {
+								 g = (Group)inObject1.readObject();
+							
+							
+							if(g.getgname().equals(s)) {
+								g.delmember(u);
+							}
+
+							}catch(java.io.EOFException e) {
+							
+						
+							
+								
+							inObject1.close();
+							inFile1.close();
+							
+							} catch (ClassNotFoundException e) {
+								// TODO 自動生成された catch ブロック
+								e.printStackTrace();
+							}
+							
+							}
+						
+						
+						}
+						
+						
+	
+						
+						u.clearGroup();
+						for(int i=0;i<kazu;i++) {
+							d=br[playerNo].readLine();
+							
+							Group g=null;
+							FileInputStream inFile1 = new FileInputStream("Group.obj");
+							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+							
+							while(true) {
+								
+								try {
+								 g = (Group)inObject1.readObject();
+							
+							
+							if(g.getgname().equals(d)) {
+								g.setmember(obj(hashA1.get(playerNo)));
+							}
+
+							}catch(java.io.EOFException e) {
+							
+						
+							
+								
+							inObject1.close();
+							inFile1.close();
+							
+							} catch (ClassNotFoundException e) {
+								// TODO 自動生成された catch ブロック
+								e.printStackTrace();
+							}
+							
+							
+							u.setGroup(g.getgname());
+						
+							}
+						
+						}
 						hashD3.put(hashA1.get(playerNo),a);
 						hashD4.put(hashA1.get(playerNo),b);//要素の置き換え
+						hashC4.put(hashA1.get(playerNo),u.getGroup());
+						
+						
 						
 						re();//ファイルの中身の書き換え
 						
@@ -238,7 +327,7 @@ public class Ser {
 					if(inputLine.equals("グループ作成")) {
 						a = br[playerNo].readLine();//グループ名//同じ名前はだめにしようと思っている
 						b = br[playerNo].readLine();//グループの説明文
-						Group g=new Group(a,b);
+						Group g=new Group(a,b,obj(hashA1.get(playerNo)));
 						 
 						FileOutputStream outFile = new FileOutputStream("group.obj");
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
@@ -249,13 +338,11 @@ public class Ser {
 						
 					}
 					
-					if(inputLine.equals("グループ入室")) {
-						a = br[playerNo].readLine();//入室したいグループ名
-						
-						hashA2.put(playerNo,a);
-
-						
-					}
+					
+					
+					
+					
+				
 					if(inputLine.equals("入室中のグループ情報")) {
 						a = br[playerNo].readLine();//情報が欲しいグループ名
 						//そのグループのオブジェクトを取得させ送る。
@@ -267,11 +354,7 @@ public class Ser {
 						
 						
 					}
-					if(inputLine.equals("グループ退室")) {
-						hashA2.put(playerNo, "not");
-
-						
-						}
+					
 					
 					if(inputLine.equals("グループ検索")) {
 						a = br[playerNo].readLine();//検索したいグループ名の取得
@@ -291,13 +374,18 @@ public class Ser {
 					if(inputLine.equals("質問内容")) {
 						
 						a=br[playerNo].readLine();//質問内容の受信
+						b=br[playerNo].readLine();//グループ名
+						c=br[playerNo].readLine();/////質問のコインも追加
+						int coin=Integer.parseInt(c);
 						String name=hashA1.get(playerNo);
-						String group=hashA2.get(playerNo);
-						
+						//String group=hashA2.get(playerNo);
+						String group=b;
 						User ques=obj(name);//質問者のオブジェクト確保
 						
-						Question p=new Question(user,a,group);
+						ques.setQuestion();
+						rewrite();
 						
+						Question p=new Question(user,a,group,coin);
 						Group g=chat(group);
 						g.setchat(p);
 						
@@ -311,7 +399,7 @@ public class Ser {
 				         
 				        
 					}
-					if(inputLine.equals("回答オファー")) {
+					if(inputLine.equals("回答立候補")) {
 						a = br[playerNo].readLine();//回答したい文面
 						String name=hashA1.get(playerNo);
 						User er=obj(name);
@@ -330,40 +418,200 @@ public class Ser {
 						
 						}
 					if(inputLine.equals("オファー来てるかな")) {
-						a = br[playerNo].readLine();//質問の内容
+						String name=hashA1.get(playerNo);
 						
-						ques(a);
-						if(ques(a)!=null) {
-							forwardq(playerNo,ques(a));
-						}else {
-							forwardMessage("false",playerNo);
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						if(q.getOffer().getName().equals(name)) {
+							forwardq(playerNo,q);
 						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
 						
 						
 					}
 					
-					if(inputLine.equals("回答者選出")) {
+					if(inputLine.equals("オファー人選出")) {
 						a = br[playerNo].readLine();//選んだ回答者の名前を取得
 						b = br[playerNo].readLine();//質問内容を受信
 						
 						Question k=ques(b);
 						if(k!=null) {
-						 k.setAnswerer(obj(a));
+						 k.setOffer(obj(a));
 						
 						qnew(k);
 						}
+					}
+					if(inputLine.equals("オファー取り消し")) {
+						a= br[playerNo].readLine();//質問内容を受信
+						
+						Question k=ques(a);
+						if(k!=null) {
+						 k.canselOffer();
+						
+						qnew(k);
+						
+					
 
 						
 						
 						
 						}
+						
+					}
+					if(inputLine.equals("オファー拒否")) {
+						String name = hashA1.get(playerNo);//選んだ回答者の名前を取得
+						a= br[playerNo].readLine();//質問内容を受信
+						
+						Question k=ques(a);
+						if(k!=null) {
+						 k.canselOffer();
+						
+						qnew(k);
+						
+					
+
+						
+						
+						
+						}
+					}
+					if(inputLine.equals("自分がした質問")) {
+						String name=hashA1.get(playerNo);
+						
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						if(q.getQuestioner().getName().equals(name)) {
+							forwardq(playerNo,q);
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+						
+						
+						
+					}
+					if(inputLine.equals("立候補してる質問")) {
+						String name=hashA1.get(playerNo);
+						
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						ArrayList<User> ki=q.getCandidates();
+						for(User u:ki) {
+							if(u.getName().equals(name)) {
+								forwardq(playerNo,q);
+							}
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+						
+						
+						
+						
+					}
+					
+				
+					
+					
+					
+					
+					
 					
 					if(inputLine.equals("回答")) {
 						a = br[playerNo].readLine();//回答の取得
+						b=br[playerNo].readLine();//質問内容
+						User u=obj(hashA1.get(playerNo));
+						
 						Question k=ques(b);
-						String group=hashA2.get(playerNo);
+						String group=k.getGroup();
 						if(k!=null) {
 						 k.setAnswer(a);
+						 k.setAnswerer(obj(hashA1.get(playerNo)));
+						 
+						 u.setAnswer();//回答数増加
+						 rewrite();
+						 
+						 
 						 Group g=chat(group);
 							g.setchat(k);
 						
@@ -394,20 +642,16 @@ public class Ser {
 						oos[playerNo].reset();
 						
 					}
-					if(inputLine.equals("質問数変更")) {
-						String name=hashA1.get(playerNo);
-						hashC2.put(name, hashC2.get(name)+1);
-						user=obj(name);
-						rewrite();
-					}
-					if(inputLine.equals("回答数変更")) {
-						String name=hashA1.get(playerNo);
-						hashC3.put(name, hashC3.get(name)+1);
-						user=obj(name);
-						rewrite();
-					}
+					
+				
 					if(inputLine.equals("評価値変更")) {
 						a = br[playerNo].readLine();//評価値の取得
+						b=br[playerNo].readLine();//質問内容の取得
+						int val=Integer.parseInt(a);
+						Question q=ques(b);
+						q.setValue(val);
+						qnew(q);
+						
 						String name=hashA1.get(playerNo);
 						
 						double value;
@@ -435,7 +679,7 @@ public class Ser {
 				
 			} catch (IOException e) { // 接続が切れたとき
 
-				hashA2.remove(playerNo);//グループから出ることになるので、インしているグルから抜ける
+				
 				member--;//接続が切れた人数分減らす
 				
 				login[playerNo]=false;
@@ -701,7 +945,7 @@ try {
 
 					fw2.write(a + "," + "0" + "," + 0 + "," + 0 + "," + "all"+ "\n");
 					
-					syoki.add("all");
+					
 
 					hashD1.put(a, b);
 
@@ -719,11 +963,11 @@ try {
 
 					hashC3.put(a, 0);
 
-					hashC4.put(a, syoki);
+					hashC4.put(a, );
 
 					k = "rtrue";
 					
-					syoki.clear();
+					
 
 				} else {
 					//System.out.println(k);
@@ -891,7 +1135,7 @@ public Group chat(String name) { //グループのチャット情報取得
 
 			FileReader fr = new FileReader(newfile);
 
-			// BufferedReaderオブジェクトを作成する
+			
 
 			BufferedReader br = new BufferedReader(fr);
 
@@ -976,8 +1220,8 @@ if(syoki!=null) {
 		pl.setJob(job);
 		pl.setBelong(belong);
 		pl.setValue(eval);
-		pl.setQuestion(qcount);
-		pl.setAnswer(acount);
+		pl.setQuestion();
+		pl.setAnswer();
 		pl.setGroup(gru);
 		
 		
