@@ -14,8 +14,8 @@ public class User implements Serializable {
 	private double value=0;
 	private int question=0;
 	private int answer=0;
-	ArrayList<String> group;
-	
+	ArrayList<String> group=new ArrayList<String>();
+
 
 
 
@@ -24,8 +24,8 @@ public class User implements Serializable {
 		this.pass=pass;
 		this.ai=ai;
 		group.add("all");
-		
-		
+
+
 	}
 
 
@@ -62,7 +62,7 @@ public class User implements Serializable {
 		return job;
 
 	}
-	
+
 	public void setBelong(String s){
 
 		belong = s;
@@ -90,9 +90,9 @@ public class User implements Serializable {
 
 
 
-	public void setQuestion(int n){
+	public void setQuestion(){
 
-		question = n;
+		question++;
 
 	}
 
@@ -106,9 +106,9 @@ public class User implements Serializable {
 
 
 
-	public void setAnswer(int n){
+	public void setAnswer(){
 
-		answer = n;
+		answer++;
 
 	}
 
@@ -125,13 +125,16 @@ public class User implements Serializable {
 
 
 
-	public ArrayList getGroup(){
+	public ArrayList<String> getGroup(){
 
 		return group;
 
 	}
-	public void setGroup(ArrayList a) {
-		group=a;
+	public void clearGroup() {
+		group.clear();
+	}
+	public void setGroup(String a) {
+		group.add(a);
 	}
 
 

@@ -6,11 +6,13 @@ import java.util.ArrayList;
 public class Group implements Serializable{
 		String gname;//グループ名
 		static ArrayList<Question> chat = new ArrayList<Question>();
-		static ArrayList<String> member = new ArrayList<String>();
+		static ArrayList<User> member = new ArrayList<User>();
+		String intro=""; 
 		
-		Group(String gname){
+		Group(String gname,String intro,User user){
 			this.gname=gname;
-			
+			this.intro=intro;
+			member.add(user);
 		}
 
 		public String getgname() {
@@ -32,14 +34,17 @@ public class Group implements Serializable{
 			return chat; 
 		}
 		
-		public void setmember(String name) {
-			member.add(name);
+		public void setmember(User user) {
+			member.add(user);
 		}
-		public void delmember(String name) {
-			member.remove(name);
+		public void delmember(User user) {
+			member.remove(user);
 		}
 		public ArrayList getmember() {
 			return member;
+		}
+		public String getintro() {
+			return intro;
 		}
 		
 		

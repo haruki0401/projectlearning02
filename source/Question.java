@@ -11,13 +11,13 @@ public class Question implements Serializable {
 
 	private User answerer;		//回答者
 
-	private User offer;			//オファーした人
+	private User offer;			//オファー人
 
 	private String question;		//質問内容
 
 	private String answer;			//回答内容
 
-	private String group;			//質問者の属するグループ
+	private String group;			//質問の属するグループ
 
 	private ArrayList<User> candidates= new ArrayList<User>();;		//立候補者のリスト
 
@@ -32,13 +32,15 @@ public class Question implements Serializable {
 
 
 
-	public Question(User questioner, String question, String group) {
+	public Question(User questioner, String question, String group,int coin) {//コインも追加
 
 		this.questioner = questioner;
 
 		this.question = question;
 
 		this.group = group;
+		
+		this.coin=coin;
 
 	}
 
@@ -49,6 +51,7 @@ public class Question implements Serializable {
 		candidates.add(candidate);
 
 	}
+	
 
 
 
@@ -58,11 +61,17 @@ public class Question implements Serializable {
 		
 
 	}
+	public void canselOffer() {
+		offer=null;
+	}
+	public User getOffer() {
+		return offer;
+	}
 	
 
 
 
-	public void setAnswerer(User user) {
+	public void setAnswerer(User user) {//回答し終わった人のこと
 
 		answerer = user;
 
@@ -83,13 +92,6 @@ public class Question implements Serializable {
 
 	}
 
-
-
-	public void renewValue(double newv) {
-
-		value = (value + newv) / 2;
-
-	}
 
 
 
