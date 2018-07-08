@@ -1,0 +1,1411 @@
+package pro2;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class Ser2 {
+
+	private static int maxconnection = 105;//100人が最大接続人数
+
+	private int port; // サーバの待ち受けポート
+
+	private boolean[] online; //オンライン状態管理用配列
+
+	private PrintWriter[] out; //データ送信用オブジェクト
+	
+	private ObjectInputStream[] ois;              /*  オブジェクト入力ストリーム  */
+
+	private ObjectOutputStream[] oos;//出力用
+
+	private Receiver[] receiver; //データ受信用オブジェクト
+
+	private static int member;//接続している人の人数
+
+	private static Socket[] socket;//受付用のソケット
+	
+	private static boolean[] login;
+
+	private static int hut=0;//作成されている二人のチャット数
+
+	static HashMap<String, String> hashD1 = new HashMap<>();//hash1はプレイヤの認証など
+	static HashMap<String, String> hashD2 = new HashMap<>();//hash2//key=aikotoba,value=password
+    static HashMap<String, String> hashD3 = new HashMap<>();//名前、職業
+	static HashMap<String, String> hashD4 = new HashMap<>();//名前、所属
+	static HashMap<String, String> hashD5 = new HashMap<>();//名前、合言葉
+	
+	static HashMap<String, Double> hashC1 = new HashMap<>();//名前、評価値
+	static HashMap<String, Integer> hashC2 = new HashMap<>();//名前、質問数
+	static HashMap<String, Integer> hashC3 = new HashMap<>();//名前、回答数
+	static HashMap<String, ArrayList<String>> hashC4 = new HashMap<>();//名前、グループ
+	
+	static HashMap<Integer,String> hashA1 = new HashMap<>();//playerNo,名前
+	
+	
+	static HashMap<String, String> hashA8 = new HashMap<>();//二人で情報をやり取りするための紐づけ
+
+	
+	//コンストラクタ
+
+	public Ser2(int port) { //待ち受けポートを引数とする
+
+		this.port = port; //待ち受けポートを渡す
+
+		out = new PrintWriter[maxconnection]; //データ送信用オブジェクトを最大人数分用意
+		oos = new ObjectOutputStream[maxconnection];
+		receiver = new Receiver[maxconnection]; //データ受信用オブジェクトを最大人数分用意
+
+		online = new boolean[maxconnection];//オンライン状態管理用配列を用意
+
+		login = new boolean[maxconnection];//認証を突破した人
+		
+		
+	}
+
+	//データ受信用スレッド(内部クラス)
+
+	class Receiver extends Thread {
+
+		private InputStreamReader[] sisr; //受信データ用文字ストリーム
+
+		private BufferedReader[] br; //文字ストリーム用のバッファ
+
+		private int playerNo;//プレイヤを識別するための番号
+
+		// 内部クラスReceiverのコンストラクタ
+
+		Receiver(Socket socket, int playerNo) {
+
+			sisr = new InputStreamReader[maxconnection];
+
+			br = new BufferedReader[maxconnection];
+
+			try {
+
+				this.playerNo = playerNo; //プレイヤ番号を渡す
+
+				sisr[playerNo] = new InputStreamReader(socket.getInputStream());
+
+				br[playerNo] = new BufferedReader(sisr[playerNo]);
+
+			} catch (IOException e) {
+
+				System.err.println("データ受信時にエラーが発生しました: " + e);
+
+			}
+
+		}
+
+		// 内部クラス Receiverのメソッド
+
+		@Override
+
+		public void run() {
+
+			try {
+				if(member >= 100) {
+					forwardMessage("最大接続人数を超えているため、接続を切ります", playerNo);
+					socket[playerNo].close();
+
+				}
+
+				int aite = 0;
+
+				while(true) {// データを受信し続ける
+					
+					User user = null;
+					
+					String inputLine = br[playerNo].readLine();//データを一行分読み込む
+
+					String a = "";
+
+					String b = "";
+
+					String c = "";
+					
+					String d="";
+					
+					if(inputLine.equals("認証")) {
+
+						a = br[playerNo].readLine();
+
+						b = br[playerNo].readLine();
+
+						if(ninsyou(a, b)) {
+
+							forwardMessage("ltrue", playerNo);
+
+							hashA1.put(playerNo, a);
+
+							login[playerNo] = true;
+							
+							user=obj(a);
+
+						} else {
+							forwardMessage("lfalse", playerNo);
+						}
+
+					}
+					
+					if(inputLine.equals("新規登録")) {
+
+						a = br[playerNo].readLine();
+
+						b = br[playerNo].readLine();
+
+						c = br[playerNo].readLine();
+
+						String k = newpeople(a, b, c);
+
+						if(k.equals("rtrue")) {
+
+							forwardMessage("rtrue", playerNo);
+							
+							user=obj(a);
+						} else {
+							forwardMessage("rfalse" + k, playerNo);
+							
+							
+						}
+
+					}
+					
+					if(inputLine.equals("忘れた人")) {
+
+						a = br[playerNo].readLine();
+
+						b = br[playerNo].readLine();
+
+						String str;
+
+						if((str = forgetman(a, b)) != null) {
+
+							forwardMessage("ftrue" , playerNo);
+							forwardMessage(str, playerNo);
+
+						}else {
+							forwardMessage("ffalse",playerNo);
+						}
+
+					}
+					if(inputLine.equals("ログアウト")) {
+
+						if(logout(playerNo)) {
+
+							login[playerNo] = false;
+
+						}
+
+					}
+					
+					
+					if(inputLine.equals("個人情報")) {
+						
+						a = br[playerNo].readLine();//職業
+
+						b = br[playerNo].readLine();//所属
+						
+						c=br[playerNo].readLine();//グループ数
+						
+						int kazu=Integer.parseInt(c);
+						User u=obj(hashA1.get(playerNo));
+						
+						for(String s:obj(hashA1.get(playerNo)).getGroup()) {
+								
+						
+							Group g=null;
+							FileInputStream inFile1 = new FileInputStream("Group.obj");
+							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+							
+							while(true) {
+								
+								try {
+								 g = (Group)inObject1.readObject();
+							
+							
+							if(g.getgname().equals(s)) {
+								g.delmember(u);
+							}
+
+							}catch(java.io.EOFException e) {
+							
+						
+							
+								
+							inObject1.close();
+							inFile1.close();
+							
+							} catch (ClassNotFoundException e) {
+								// TODO 自動生成された catch ブロック
+								e.printStackTrace();
+							}
+							
+							}
+						
+						
+						}
+						
+						
+	
+						
+						u.clearGroup();
+						for(int i=0;i<kazu;i++) {
+							d=br[playerNo].readLine();
+							
+							Group g=null;
+							FileInputStream inFile1 = new FileInputStream("Group.obj");
+							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+							
+							while(true) {
+								
+								try {
+								 g = (Group)inObject1.readObject();
+							
+							
+							if(g.getgname().equals(d)) {
+								g.setmember(obj(hashA1.get(playerNo)));
+							}
+
+							}catch(java.io.EOFException e) {
+							
+						
+							
+								
+							inObject1.close();
+							inFile1.close();
+							
+							} catch (ClassNotFoundException e) {
+								// TODO 自動生成された catch ブロック
+								e.printStackTrace();
+							}
+							
+							
+							u.setGroup(g.getgname());
+						
+							}
+						
+						}
+						hashD3.put(hashA1.get(playerNo),a);
+						hashD4.put(hashA1.get(playerNo),b);//要素の置き換え
+						hashC4.put(hashA1.get(playerNo),u.getGroup());
+						
+						
+						
+						unew(u);//ファイルの中身の書き換え
+						
+						
+						
+						
+					}
+					
+					
+					///グループ化チャット機能
+					if(inputLine.equals("グループ作成")) {
+						a = br[playerNo].readLine();//グループ名//同じ名前はだめにしようと思っている
+						b = br[playerNo].readLine();//グループの説明文
+						Group g=new Group(a,b,obj(hashA1.get(playerNo)));
+						 
+						FileOutputStream outFile = new FileOutputStream("group.obj");
+						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+						outObject.writeObject(a);
+						outObject.close();
+						outFile.close();
+						
+						
+					}
+					
+					
+					
+					
+					
+				
+					if(inputLine.equals("入室中のグループ情報")) {
+						a = br[playerNo].readLine();//情報が欲しいグループ名
+						//そのグループのオブジェクトを取得させ送る。
+						if(chat(a)!=null) {
+						forwardgru(playerNo,chat(a));
+						}else {
+							forwardMessage("gfalse",playerNo);
+						}
+						
+						
+					}
+					
+					
+					if(inputLine.equals("グループ検索")) {
+						a = br[playerNo].readLine();//検索したいグループ名の取得
+						
+						if(serch(a)) {
+							forwardMessage("gtrue",playerNo);
+						}else{
+							forwardMessage("gfalse",playerNo);
+						}
+						
+
+						}
+
+					
+					
+					
+					if(inputLine.equals("質問内容")) {
+						
+						a=br[playerNo].readLine();//質問内容の受信
+						b=br[playerNo].readLine();//グループ名
+						c=br[playerNo].readLine();/////質問のコインも追加
+						int coin=Integer.parseInt(c);
+						String name=hashA1.get(playerNo);
+						//String group=hashA2.get(playerNo);
+						String group=b;
+						User ques=obj(name);//質問者のオブジェクト確保
+						
+						ques.setQuestion();
+						hashC2.put(name,ques.getQuestion());
+						ques.minusCoin(coin);//賭けたコインの分だけ減らす。
+						unew(ques);//ファイルの更新
+						
+						Question p=new Question(user,a,group,coin);
+						Group g=chat(group);
+						g.setchat(p);
+						
+						FileOutputStream outFile = new FileOutputStream("Question.obj");
+						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+						outObject.writeObject(p);
+						outObject.close();
+						outFile.close();
+						
+
+				         
+				        
+					}
+					if(inputLine.equals("質問取り消し")) {//新しく追加しました。
+						a=br[playerNo].readLine();//取り消したい質問内容の受信
+						String name=hashA1.get(playerNo);
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						if(q.getQuestion().equals(a)) {
+							User u=obj(hashA1.get(playerNo));
+							u.plusCoin(q.getCoin());//質問に賭けていたコインを返してもらう
+							unew(u);//playerファイルの更新
+							qdelete(q);//要素をQuestion.objから削除する
+							
+							
+							
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+					}
+					if(inputLine.equals("回答立候補")) {
+						a = br[playerNo].readLine();//回答したい文面
+						String name=hashA1.get(playerNo);
+						User er=obj(name);
+						Question k=ques(a);
+					    if(k!=null) {
+					    	k.setCandidates(user);
+					    
+					    
+					    qnew(k);//ファイルの内容を更新
+					    }
+						
+						
+						
+
+						
+						
+						}
+					if(inputLine.equals("オファー来てるかな")) {
+						String name=hashA1.get(playerNo);
+						
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						if(q.getOffer().getName().equals(name)) {
+							forwardq(playerNo,q);
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+						
+						
+					}
+					
+					if(inputLine.equals("オファー人選出")) {
+						a = br[playerNo].readLine();//選んだ回答者の名前を取得
+						b = br[playerNo].readLine();//質問内容を受信
+						
+						Question k=ques(b);
+						if(k!=null) {
+						 k.setOffer(obj(a));
+						
+						qnew(k);
+						}
+					}
+					if(inputLine.equals("オファー取り消し")) {
+						a= br[playerNo].readLine();//質問内容を受信
+						
+						Question k=ques(a);
+						if(k!=null) {
+						 k.canselOffer();
+						
+						qnew(k);
+						
+					
+
+						
+						
+						
+						}
+						
+					}
+					if(inputLine.equals("オファー拒否")) {
+						String name = hashA1.get(playerNo);//選んだ回答者の名前を取得
+						a= br[playerNo].readLine();//質問内容を受信
+						
+						Question k=ques(a);
+						if(k!=null) {
+						 k.canselOffer();
+						
+						qnew(k);
+						
+					
+
+						
+						
+						
+						}
+					}
+					if(inputLine.equals("自分がした質問")) {
+						String name=hashA1.get(playerNo);
+						
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						if(q.getQuestioner().getName().equals(name)) {
+							forwardq(playerNo,q);
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+						
+						
+						
+					}
+					if(inputLine.equals("立候補してる質問")) {
+						String name=hashA1.get(playerNo);
+						
+						FileInputStream inFile1 = new FileInputStream("Question.obj");
+						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+						Question q;
+						
+						
+						try {
+						
+						while(true) {
+						
+						q = (Question)inObject1.readObject();
+						ArrayList<User> ki=q.getCandidates();
+						for(User u:ki) {
+							if(u.getName().equals(name)) {
+								forwardq(playerNo,q);
+							}
+						}
+						
+						
+						}
+						
+						
+						
+						}catch(java.io.EOFException e) {
+						
+					
+						
+							
+						inObject1.close();
+						inFile1.close();
+						
+						} catch (ClassNotFoundException e) {
+							// TODO 自動生成された catch ブロック
+							e.printStackTrace();
+						}
+						
+						
+						
+						
+						
+						
+						
+					}
+					
+				
+					
+					
+					
+					
+					
+					
+					if(inputLine.equals("回答")) {
+						a = br[playerNo].readLine();//回答の取得
+						b=br[playerNo].readLine();//質問内容
+						User u=obj(hashA1.get(playerNo));
+						
+						Question k=ques(b);
+						String group=k.getGroup();
+						if(k!=null) {
+						 k.setAnswer(a);
+						 hashC3.put(hashA1.get(playerNo), u.getAnswer());
+						 k.setAnswerer(obj(hashA1.get(playerNo)));
+						 
+						 u.setAnswer();//回答数増加
+						 u.plusCoin(k.getCoin());//質問に欠けられているコインの分だけ足す。
+						 
+						 
+						 
+						 
+						 
+						 unew(u);//ファイルの更新
+						 
+						 
+						 Group g=chat(group);
+							g.setchat(k);
+						
+						qnew(k);
+						}
+					}
+					
+
+					if(inputLine.equals("情報")) {//プレイヤーの全情報が詰まったオブジェクトを送る。
+						a = br[playerNo].readLine();//情報が欲しい人の名前
+						
+						
+						oos[playerNo].writeObject(obj(a));
+
+						oos[playerNo].flush();
+						
+						oos[playerNo].reset();
+						
+					}
+					
+				
+					if(inputLine.equals("評価値変更")) {
+						a = br[playerNo].readLine();//評価値の取得
+						b=br[playerNo].readLine();//質問内容の取得
+						int val=Integer.parseInt(a);
+						Question q=ques(b);
+						q.setValue(val);
+						qnew(q);
+						
+						String name=hashA1.get(playerNo);
+						
+						double value;
+						double kai;
+						double hen;
+						hen=Double.parseDouble(a);
+						kai=(double)hashC3.get(name);
+						value=hashC1.get(name);
+						value=(value/(kai-1)+hen)/kai;//平均値を算出しなおしている。
+						hashC1.put(name,value);
+						
+						user=obj(name);
+						
+						unew(user);
+						
+					}
+					
+					
+					
+					
+				}	
+					
+					
+					
+				
+			} catch (IOException e) { // 接続が切れたとき
+
+				
+				member--;//接続が切れた人数分減らす
+				
+				login[playerNo]=false;
+				online[playerNo] = false; //プレイヤの接続状態を更新する
+
+			
+
+
+			}
+
+		}
+
+}
+
+	
+
+	///// メソッド///////////////////
+	public void acceptClient() { //クライアントの接続(サーバの起動)
+
+		int n = 1;
+
+		member = 0;//誰も接続していないときは0
+
+		try {
+
+			System.out.println("サーバが起動しました．");
+
+			ServerSocket ss = new ServerSocket(port); //サーバソケットを用意
+
+			while(true) {
+
+				if(online[n] == false) {
+
+					socket[n] = ss.accept(); //新規接続を受け付ける
+
+					online[n] = true;
+
+					out[n] = new PrintWriter(socket[n].getOutputStream(), true);
+
+					receiver[n] = new Receiver(socket[n], n);
+
+					online[n] = true;
+
+					receiver[n].start();//スレッドを起動←コイツをどこで発動するか
+
+					member++;
+
+				} else if(online[n] == true) {
+
+					n++;
+
+					if(n > 104) {//注
+
+						n = 1;
+
+					}
+
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			System.err.println("ソケット作成時にエラーが発生しました: " + e);
+
+		}
+
+	}
+	public void forwardMessage(String msg, int playerNo) { //操作情報の転送
+
+		out[playerNo].println(msg);
+
+		out[playerNo].flush();
+
+	}
+	
+
+	public void forwardgru(int playerNo,Group a) {//グループオブジェクト送信
+	try {
+		oos[playerNo].writeObject(a);
+	
+		oos[playerNo].flush();
+	
+		oos[playerNo].reset();
+	} catch (IOException e) {
+		// TODO 自動生成された catch ブロック
+		e.printStackTrace();
+	}
+
+}
+	
+	public void forwardq(int playerNo,Question a) {//クエスチョンオブジェクト送信
+	try {
+		oos[playerNo].writeObject(a);
+	
+		oos[playerNo].flush();
+	
+		oos[playerNo].reset();
+	} catch (IOException e) {
+		// TODO 自動生成された catch ブロック
+		e.printStackTrace();
+	}
+
+}
+
+	public boolean ninsyou(String name, String pass) {//プレイヤの認証
+
+		User u;
+		try {	
+		FileInputStream inFile1 = new FileInputStream("User.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+		
+		
+		
+		try {
+		
+		while(true) {
+		u = (User)inObject1.readObject();
+	    if(u.getName().equals(name)) {
+	    	if(u.getPassword().equals(name)) {
+	    	inObject1.close();
+			inFile1.close();
+	    	return true;
+	    	}
+	    }
+		}
+		
+		}catch(java.io.EOFException e) {
+
+			
+			
+			inObject1.close();
+			inFile1.close();
+			return false;
+		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		
+		
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} 
+		return false;
+	//ここには到達できない。
+		
+
+	}
+
+	
+
+	public void qnew(Question k) {//Questionfileの更新
+		
+		Question Q;
+		try {
+		ArrayList<Question> a = new ArrayList<Question>();
+		FileInputStream inFile1 = new FileInputStream("Question.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+try {
+		while(true) {
+			Q = (Question)inObject1.readObject();
+			if(Q.getQuestion().equals(k.getQuestion())) {
+				a.add(k);
+			}else {
+		    a.add(Q);
+			}
+			}
+			
+			}catch(java.io.EOFException e) {
+		
+				
+				
+				
+			inObject1.close();
+			inFile1.close();
+			
+			} catch (ClassNotFoundException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+
+		
+		
+		
+		FileOutputStream outFile = new FileOutputStream("Question.obj");
+		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+		for(Question r:a) {
+		
+			outObject.writeObject(r);
+		
+		}
+		
+			outObject.close();
+		
+		outFile.close();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
+	}
+	
+public void qdelete(Question k) {//Questionfile内の要素の削除
+		
+		Question Q;
+		try {
+		ArrayList<Question> a = new ArrayList<Question>();
+		FileInputStream inFile1 = new FileInputStream("Question.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+try {
+		while(true) {
+			Q = (Question)inObject1.readObject();
+			if(Q.getQuestion().equals(k.getQuestion())) {
+			}else {
+		    a.add(Q);
+			}
+			}
+			
+			}catch(java.io.EOFException e) {
+		
+				
+				
+				
+			inObject1.close();
+			inFile1.close();
+			
+			} catch (ClassNotFoundException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+
+		
+		
+		
+		FileOutputStream outFile = new FileOutputStream("Question.obj");
+		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+		for(Question r:a) {
+		
+			outObject.writeObject(r);
+		
+		}
+		
+			outObject.close();
+		
+		outFile.close();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
+	}
+	
+public void unew(User u) {//User.faileの更新
+		
+		User U;;
+		try {
+		ArrayList<User> a = new ArrayList<User>();
+		FileInputStream inFile1 = new FileInputStream("User.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+try {
+		while(true) {
+			U = (User)inObject1.readObject();
+			if(U.getName().equals(u.getName())) {
+				a.add(u);
+			}else {
+		    a.add(U);
+			}
+			}
+			
+			}catch(java.io.EOFException e) {
+		
+				
+				
+				
+			inObject1.close();
+			inFile1.close();
+			
+			} catch (ClassNotFoundException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+
+		
+		
+		
+		FileOutputStream outFile = new FileOutputStream("User.obj");//ここは上書きではなくすべて書き出すのでtrue　なし
+		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+		for(User r:a) {
+		
+			outObject.writeObject(r);
+		
+		}
+		
+			outObject.close();
+		
+		outFile.close();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
+	}
+
+public void udelete(User u) {//User.faileの更新
+	
+	User U;;
+	try {
+	ArrayList<User> a = new ArrayList<User>();
+	FileInputStream inFile1 = new FileInputStream("User.obj");
+	ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+try {
+	while(true) {
+		U = (User)inObject1.readObject();
+		if(U.getName().equals(u.getName())) {
+			//a.add(u);
+		}else {
+	    a.add(U);
+		}
+		}
+		
+		}catch(java.io.EOFException e) {
+	
+			
+			
+			
+		inObject1.close();
+		inFile1.close();
+		
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+	
+	
+	
+	FileOutputStream outFile = new FileOutputStream("User.obj");//ここは上書きではなくすべて書き出すのでtrue　なし
+	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+	for(User r:a) {
+	
+		outObject.writeObject(r);
+	
+	}
+	
+		outObject.close();
+	
+	outFile.close();
+	} catch (IOException e) {
+		// TODO 自動生成された catch ブロック
+		e.printStackTrace();
+	}
+	
+}
+
+	
+	public String newpeople(String a, String b, String c) {//新規登録の認証
+
+		String k = "";
+
+		try {
+		FileOutputStream outFile = new FileOutputStream("User.obj");
+		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+		
+			
+		
+			if(!c.matches("^[ぁ-んー]*$")) {
+				k = "合言葉はひらがなのみです";
+
+			} else if(!a.matches("^[0-9a-zA-Z]*$") || !b.matches("^[0-9a-zA-Z]*$")) {//合言葉のひらがな判定、正規表現
+				k = "名前とパスワードは半角英数字です";
+
+			} else if(a.length() > 8) {
+				k = "名前が8文字以上です";
+			} else if(b.length() > 16) {
+				k = "パスワードが16文字以上です";
+			} else {
+				User u=new User(a,b,c);
+
+			
+					outObject.writeObject(u);
+					
+
+					hashD1.put(a, b);
+
+					hashD2.put(c, b);
+					
+					hashD5.put(a, c);
+
+					hashC1.put(a, (double) 0);
+
+					hashC2.put(a, 0);
+					
+					hashC3.put(a,0);
+				
+				
+				    outObject.close();
+			
+				    outFile.close();
+			
+			}
+				} catch (IOException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
+				}
+					
+			
+			
+			
+			
+			
+			return k;
+
+	}
+	public boolean logout(int a) {//ログアウト処理
+
+		return true;
+
+	}
+public Group chat(String name) { //グループのチャット情報取得
+	
+	Group gu;
+	try {	
+	FileInputStream inFile1 = new FileInputStream("group.obj");
+	ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+	
+	
+	
+	try {
+	
+	while(true) {
+	gu = (Group)inObject1.readObject();
+    if(gu.getgname().equals(name)) {
+    	inObject1.close();
+		inFile1.close();
+    	return gu;
+    }
+	}
+	
+	}catch(java.io.EOFException e) {
+
+		
+		
+		inObject1.close();
+		inFile1.close();
+		return null;
+	}
+	} catch (IOException e1) {
+		// TODO 自動生成された catch ブロック
+		e1.printStackTrace();
+	
+	
+	} catch (ClassNotFoundException e) {
+		// TODO 自動生成された catch ブロック
+		e.printStackTrace();
+	} 
+	return null;
+//ここには到達できない。
+	
+}public Question ques(String Q) { //クエスチョン取得
+	
+	Question q;
+	try {	
+	FileInputStream inFile1 = new FileInputStream("Question.obj");
+	ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+	
+	
+	
+	try {
+	
+	while(true) {
+	q = (Question)inObject1.readObject();
+    if(q.getQuestion().equals(Q)) {
+    	inObject1.close();
+		inFile1.close();
+    	return q;
+    }
+	}
+	
+	}catch(java.io.EOFException e) {
+
+		
+		
+		inObject1.close();
+		inFile1.close();
+		return null;
+	}
+	} catch (IOException e1) {
+		// TODO 自動生成された catch ブロック
+		e1.printStackTrace();
+	
+	
+	} catch (ClassNotFoundException e) {
+		// TODO 自動生成された catch ブロック
+		e.printStackTrace();
+	} 
+	return null;
+//ここには到達できない。
+	
+}
+	public static boolean serch(String name) {//名前からグループを検索
+		Group gu;
+		try {	
+		FileInputStream inFile1 = new FileInputStream("group.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+		
+		
+		
+		try {
+		
+		while(true) {
+		gu = (Group)inObject1.readObject();
+	    if(gu.getgname().equals(name)) {
+	    	inObject1.close();
+			inFile1.close();
+	    	return true;
+	    }
+		}
+		
+		}catch(java.io.EOFException e) {
+
+			
+			
+			inObject1.close();
+			inFile1.close();
+			return false;
+		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		
+		
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} 
+		return false;
+	//ここには到達できない。
+		
+	}
+	
+	
+	
+	
+	public String forgetman(String a, String b) {//忘れた人にパスワードを返す。//名前と合言葉から
+
+
+			String key1 = hashD1.get(a);
+
+			String key2 = hashD2.get(b);
+
+			if(key1 != null && key2 != null) {
+
+				if(key1.equals(key2)) {
+
+					return key1;
+
+				} else {
+
+					return null;
+
+				}
+
+			} else {
+
+				return null;
+
+			}
+
+		}
+	
+	
+	public User obj(String name) {//userのオブジェクト生成、別にファイルを開いてもいいが、ファイルはなるべく開きたくないからハッシュで処理
+		
+		String pass=hashD1.get(name);
+		String ai=hashD5.get(name);
+		String job=hashD3.get(name);
+		String belong=hashD4.get(name);
+		double eval=hashC1.get(name);
+		int qcount=hashC2.get(name);
+		int acount=hashC3.get(name);
+		ArrayList<String> gru=hashC4.get(name);
+		User pl=new User(name,pass,ai);
+		pl.setJob(job);
+		pl.setBelong(belong);
+		pl.setValue(eval);
+		pl.setQuestion();
+		pl.setAnswer();
+		pl.decAnswer(acount);
+		pl.decQuestion(qcount);
+		pl.clearGroup();
+		for(String s:gru) {
+		pl.setGroup(s);
+		}
+		unew(pl);
+		
+		return pl;
+		
+		
+	}
+	/////////////////////////////サーバー用のメソッド//////////////////////////////////////////////
+	public void Uhyouzi() {//現在の登録しているアカウント情報確認
+		User u;
+		try {	
+		FileInputStream inFile1 = new FileInputStream("user.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+		
+		
+		
+		try {
+		
+		while(true) {
+		u= (User)inObject1.readObject();
+		System.out.println(u.getName()+","+u.getPassword()+","+u.getAikotoba()+","+u.getBelong()+","+u.getJob()+","+u.getValue()+","+u.getQuestion()+","+u.getAnswer()+","+u.getGroup());
+		}
+		
+		}catch(java.io.EOFException e) {
+
+			
+			
+			inObject1.close();
+			inFile1.close();
+			
+		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		
+		
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} 
+	
+	//ここには到達できない。
+		
+	
+		
+	}
+	public void Ghyouzi() {//現在の登録しているグループ名確認
+		Group g;
+		try {	
+		FileInputStream inFile1 = new FileInputStream("Group.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+		
+		
+		
+		try {
+		
+		while(true) {
+		g= (Group)inObject1.readObject();
+		System.out.println(g.getgname());
+		}
+		
+		}catch(java.io.EOFException e) {
+
+			
+			
+			inObject1.close();
+			inFile1.close();
+			
+		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		
+		
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} 
+	
+	//ここには到達できない。
+		
+	
+		
+	}
+	
+	
+	public void ban(User u) {//アカウントBan用
+		udelete(u);
+	}
+	
+	
+	
+	///////////////////////////////////
+
+	
+
+	/////////////mainメソッド/////////////////////////////////////////////////
+public static void main(String[] args) { //main
+
+		Ser2 server = new Ser2(10000); //待ち受けポート10000番でサーバオブジェクトを準備
+
+		server.acceptClient(); //クライアント受け入れを開始
+
+	
+}
+}
+
+
+
