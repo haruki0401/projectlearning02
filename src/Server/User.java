@@ -15,6 +15,7 @@ public class User implements Serializable {
 	private int question=0;
 	private int answer=0;
 	ArrayList<String> group=new ArrayList<String>();
+	private int coin=0;
 
 
 
@@ -23,7 +24,6 @@ public class User implements Serializable {
 		this.name=name;
 		this.pass=pass;
 		this.ai=ai;
-		group.add("all");
 
 
 	}
@@ -119,7 +119,13 @@ public class User implements Serializable {
 		return answer;
 
 	}
-
+	public void decAnswer(int a) {
+		answer=a;
+	}
+	public void decQuestion(int q) {
+		question=q;
+	
+}
 
 
 
@@ -136,6 +142,24 @@ public class User implements Serializable {
 	public void setGroup(String a) {
 		group.add(a);
 	}
+	public void setCoin(int a) {
+		coin=a;
+	}
+	public int getCoin() {
+		return coin;
+	}
+	public void minusCoin(int a) {
+		coin=coin-a;
+	}
+	public void plusCoin(int a) {
+		coin=coin+a;
+	}
+	
+	
+	
+	
+	
+
 
 
 
