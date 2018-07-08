@@ -386,50 +386,7 @@ public class Ser2 {
 				         
 				        
 					}
-					if(inputLine.equals("質問取り消し")) {//新しく追加しました。
-						a=br[playerNo].readLine();//取り消したい質問内容の受信
-						String name=hashA1.get(playerNo);
-						FileInputStream inFile1 = new FileInputStream("Question.obj");
-						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
-						Question q;
-						
-						
-						try {
-						
-						while(true) {
-						
-						q = (Question)inObject1.readObject();
-						if(q.getQuestion().equals(a)) {
-							User u=obj(hashA1.get(playerNo));
-							u.plusCoin(q.getCoin());//質問に賭けていたコインを返してもらう
-							unew(u);//playerファイルの更新
-							qdelete(q);//要素をQuestion.objから削除する
-							
-							
-							
-						}
-						
-						
-						}
-						
-						
-						
-						}catch(java.io.EOFException e) {
-						
 					
-						
-							
-						inObject1.close();
-						inFile1.close();
-						
-						} catch (ClassNotFoundException e) {
-							// TODO 自動生成された catch ブロック
-							e.printStackTrace();
-						}
-						
-						
-						
-					}
 					if(inputLine.equals("回答立候補")) {
 						a = br[playerNo].readLine();//回答したい文面
 						String name=hashA1.get(playerNo);
@@ -699,10 +656,64 @@ public class Ser2 {
 					
 					
 					
+				//////////////////追加/////////////////////////////
+				if(inputLine.equals("コイン購入")) {
+					a=br[playerNo].readLine();//コイン購入量
+					int coin=Integer.parseInt(a);
+					User u=obj(hashA1.get(playerNo));
+					u.plusCoin(coin);
+					
+				}
+				
+				
+				
+				if(inputLine.equals("質問取り消し")) {//新しく追加しました。
+					a=br[playerNo].readLine();//取り消したい質問内容の受信
+					String name=hashA1.get(playerNo);
+					FileInputStream inFile1 = new FileInputStream("Question.obj");
+					ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+					Question q;
+					
+					
+					try {
+					
+					while(true) {
+					
+					q = (Question)inObject1.readObject();
+					if(q.getQuestion().equals(a)) {
+						User u=obj(hashA1.get(playerNo));
+						u.plusCoin(q.getCoin());//質問に賭けていたコインを返してもらう
+						unew(u);//playerファイルの更新
+						qdelete(q);//要素をQuestion.objから削除する
+						
+						
+						
+					}
+					
+					
+					}
+					
+					
+					
+					}catch(java.io.EOFException e) {
+					
+				
+					
+						
+					inObject1.close();
+					inFile1.close();
+					
+					} catch (ClassNotFoundException e) {
+						// TODO 自動生成された catch ブロック
+						e.printStackTrace();
+					}
+					
+					
+					
+				}
+					
+					
 				}	
-					
-					
-					
 				
 			} catch (IOException e) { // 接続が切れたとき
 
