@@ -23,7 +23,7 @@ public class Ser2 {
 
 	private PrintWriter[] out; //データ送信用オブジェクト
 	
-	private ObjectInputStream[] ois;              /*  オブジェクト入力ストリーム  */
+	//private ObjectInputStream[] ois;              /*  オブジェクト入力ストリーム  */
 
 	private ObjectOutputStream[] oos;//出力用
 
@@ -35,7 +35,7 @@ public class Ser2 {
 	
 	private static boolean[] login;
 
-	private static int hut=0;//作成されている二人のチャット数
+	//private static int hut=0;//作成されている二人のチャット数
 
 	static HashMap<String, String> hashD1 = new HashMap<>();//hash1はプレイヤの認証など
 	static HashMap<String, String> hashD2 = new HashMap<>();//hash2//key=aikotoba,value=password
@@ -67,6 +67,7 @@ public class Ser2 {
 		online = new boolean[maxconnection];//オンライン状態管理用配列を用意
 
 		login = new boolean[maxconnection];//認証を突破した人
+		socket=new Socket[maxconnection];
 		
 		
 	}
@@ -118,7 +119,7 @@ public class Ser2 {
 
 				}
 
-				int aite = 0;
+				//int aite = 0;
 
 				while(true) {// データを受信し続ける
 					
@@ -165,14 +166,16 @@ public class Ser2 {
 						c = br[playerNo].readLine();
 
 						String k = newpeople(a, b, c);
-
+						
+						hashA1.put(playerNo,a);
+					
 						if(k.equals("rtrue")) {
-
 							forwardMessage("rtrue", playerNo);
 							
 							user=obj(a);
 						} else {
-							forwardMessage("rfalse" + k, playerNo);
+
+							forwardMessage("rfalse" , playerNo);
 							
 							
 						}
@@ -217,6 +220,7 @@ public class Ser2 {
 						c=br[playerNo].readLine();//グループ数
 						
 						int kazu=Integer.parseInt(c);
+						System.out.println(hashA1.get(playerNo));
 						User u=obj(hashA1.get(playerNo));
 						
 						for(String s:obj(hashA1.get(playerNo)).getGroup()) {
@@ -265,6 +269,7 @@ public class Ser2 {
 							FileInputStream inFile1 = new FileInputStream("Group.obj");
 							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 							
+							
 							while(true) {
 								
 								try {
@@ -312,9 +317,9 @@ public class Ser2 {
 					if(inputLine.equals("グループ作成")) {
 						a = br[playerNo].readLine();//グループ名//同じ名前はだめにしようと思っている
 						b = br[playerNo].readLine();//グループの説明文
-						Group g=new Group(a,b,obj(hashA1.get(playerNo)));
+						//Group g=new Group(a,b,obj(hashA1.get(playerNo)));
 						 
-						FileOutputStream outFile = new FileOutputStream("group.obj");
+						FileOutputStream outFile = new FileOutputStream("Group.obj");
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 						outObject.writeObject(a);
 						outObject.close();
@@ -389,8 +394,8 @@ public class Ser2 {
 					
 					if(inputLine.equals("回答立候補")) {
 						a = br[playerNo].readLine();//回答したい文面
-						String name=hashA1.get(playerNo);
-						User er=obj(name);
+						//String name=hashA1.get(playerNo);
+						//User er=obj(name);
 						Question k=ques(a);
 					    if(k!=null) {
 					    	k.setCandidates(user);
@@ -662,6 +667,7 @@ public class Ser2 {
 					int coin=Integer.parseInt(a);
 					User u=obj(hashA1.get(playerNo));
 					u.plusCoin(coin);
+					unew(u);
 					
 				}
 				
@@ -1097,26 +1103,35 @@ try {
 			} else {
 				User u=new User(a,b,c);
 
-			
+					ArrayList<String> g=new ArrayList<String>();
+					g.add("all");
 					outObject.writeObject(u);
-					
+				
 
 					hashD1.put(a, b);
 
 					hashD2.put(c, b);
 					
+					hashD3.put(a,"job");
+					
+					hashD4.put(a,"belong");
+					
 					hashD5.put(a, c);
 
-					hashC1.put(a, (double) 0);
+					hashC1.put(a, u.getValue());
 
 					hashC2.put(a, 0);
 					
 					hashC3.put(a,0);
+					
+					hashC4.put(a,g);
 				
 				
 				    outObject.close();
 			
 				    outFile.close();
+				    
+				    k="rtrue";
 			
 			}
 				} catch (IOException e) {
@@ -1127,7 +1142,7 @@ try {
 			
 			
 			
-			
+			System.out.println(k);
 			
 			return k;
 
@@ -1141,7 +1156,7 @@ public Group chat(String name) { //グループのチャット情報取得
 	
 	Group gu;
 	try {	
-	FileInputStream inFile1 = new FileInputStream("group.obj");
+	FileInputStream inFile1 = new FileInputStream("Group.obj");
 	ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 	
 	
@@ -1221,7 +1236,7 @@ public Group chat(String name) { //グループのチャット情報取得
 	public static boolean serch(String name) {//名前からグループを検索
 		Group gu;
 		try {	
-		FileInputStream inFile1 = new FileInputStream("group.obj");
+		FileInputStream inFile1 = new FileInputStream("Group.obj");
 		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 		
 		
@@ -1292,6 +1307,8 @@ public Group chat(String name) { //グループのチャット情報取得
 	
 	public User obj(String name) {//userのオブジェクト生成、別にファイルを開いてもいいが、ファイルはなるべく開きたくないからハッシュで処理
 		
+		
+	
 		String pass=hashD1.get(name);
 		String ai=hashD5.get(name);
 		String job=hashD3.get(name);
@@ -1322,7 +1339,7 @@ public Group chat(String name) { //グループのチャット情報取得
 	public void Uhyouzi() {//現在の登録しているアカウント情報確認
 		User u;
 		try {	
-		FileInputStream inFile1 = new FileInputStream("user.obj");
+		FileInputStream inFile1 = new FileInputStream("User.obj");
 		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 		
 		
@@ -1410,7 +1427,7 @@ public Group chat(String name) { //グループのチャット情報取得
 	/////////////mainメソッド/////////////////////////////////////////////////
 public static void main(String[] args) { //main
 
-		Ser2 server = new Ser2(10000); //待ち受けポート10000番でサーバオブジェクトを準備
+		Ser2 server = new Ser2(10084); //待ち受けポート10000番でサーバオブジェクトを準備
 
 		server.acceptClient(); //クライアント受け入れを開始
 
