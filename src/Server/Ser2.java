@@ -220,19 +220,23 @@ public class Ser2 {
 						c=br[playerNo].readLine();//グループ数
 						
 						int kazu=Integer.parseInt(c);
-						System.out.println(hashA1.get(playerNo));
+						
 						User u=obj(hashA1.get(playerNo));
 						
 						for(String s:obj(hashA1.get(playerNo)).getGroup()) {
 								
-						
+							
 							Group g=null;
+							
 							FileInputStream inFile1 = new FileInputStream("Group.obj");
+							
 							ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+							
 							
 							while(true) {
 								
 								try {
+									
 								 g = (Group)inObject1.readObject();
 							
 							
@@ -247,10 +251,12 @@ public class Ser2 {
 								
 							inObject1.close();
 							inFile1.close();
+							break;
 							
 							} catch (ClassNotFoundException e) {
 								// TODO 自動生成された catch ブロック
 								e.printStackTrace();
+								
 							}
 							
 							}
@@ -287,7 +293,7 @@ public class Ser2 {
 								
 							inObject1.close();
 							inFile1.close();
-							
+							break;
 							} catch (ClassNotFoundException e) {
 								// TODO 自動生成された catch ブロック
 								e.printStackTrace();
@@ -306,8 +312,8 @@ public class Ser2 {
 						
 						
 						unew(u);//ファイルの中身の書き換え
-						
-						
+						Uhyouzi();
+					
 						
 						
 					}
@@ -439,7 +445,7 @@ public class Ser2 {
 							
 						inObject1.close();
 						inFile1.close();
-						
+						break;
 						} catch (ClassNotFoundException e) {
 							// TODO 自動生成された catch ブロック
 							e.printStackTrace();
@@ -525,7 +531,7 @@ public class Ser2 {
 							
 						inObject1.close();
 						inFile1.close();
-						
+						break;
 						} catch (ClassNotFoundException e) {
 							// TODO 自動生成された catch ブロック
 							e.printStackTrace();
@@ -569,7 +575,7 @@ public class Ser2 {
 							
 						inObject1.close();
 						inFile1.close();
-						
+						break;
 						} catch (ClassNotFoundException e) {
 							// TODO 自動生成された catch ブロック
 							e.printStackTrace();
@@ -622,9 +628,11 @@ public class Ser2 {
 
 					if(inputLine.equals("情報")) {//プレイヤーの全情報が詰まったオブジェクトを送る。
 						a = br[playerNo].readLine();//情報が欲しい人の名前
+						System.out.println(a);
+						User u=obj(a);
 						
-						
-						oos[playerNo].writeObject(obj(a));
+						oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+						oos[playerNo].writeObject(u);
 
 						oos[playerNo].flush();
 						
@@ -708,7 +716,7 @@ public class Ser2 {
 						
 					inObject1.close();
 					inFile1.close();
-					
+					break;
 					} catch (ClassNotFoundException e) {
 						// TODO 自動生成された catch ブロック
 						e.printStackTrace();
@@ -803,6 +811,7 @@ public class Ser2 {
 
 	public void forwardgru(int playerNo,Group a) {//グループオブジェクト送信
 	try {
+		oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 		oos[playerNo].writeObject(a);
 	
 		oos[playerNo].flush();
@@ -817,6 +826,7 @@ public class Ser2 {
 	
 	public void forwardq(int playerNo,Question a) {//クエスチョンオブジェクト送信
 	try {
+		oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 		oos[playerNo].writeObject(a);
 	
 		oos[playerNo].flush();
@@ -1141,8 +1151,7 @@ try {
 					
 			
 			
-			
-			System.out.println(k);
+	
 			
 			return k;
 
@@ -1429,10 +1438,36 @@ public static void main(String[] args) { //main
 
 		Ser2 server = new Ser2(10084); //待ち受けポート10000番でサーバオブジェクトを準備
 
-		server.acceptClient(); //クライアント受け入れを開始
+		
+		try {
+		
+			
+		 FileOutputStream outFile = new FileOutputStream("User.obj");
+		 ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+         User u=new User("dammy","dammy","りんご");
+         outObject.writeObject(u);
+		 outObject.close();
+         outFile.close();
+         
+         FileOutputStream outFile1 = new FileOutputStream("Group.obj");
+		 ObjectOutputStream outObject1 = new ObjectOutputStream(outFile1);
+         Group g=new Group("dammy","dammy",u);
+         outObject1.writeObject(g);
+		 outObject1.close();
+         outFile1.close();
+         
+         
+         
+         
+         
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
 
-	
+		server.acceptClient(); //クライアント受け入れを開始
 }
+
 }
 
 
