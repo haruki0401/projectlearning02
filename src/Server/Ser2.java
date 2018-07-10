@@ -325,11 +325,22 @@ public class Ser2 {
 						b = br[playerNo].readLine();//グループの説明文
 						//Group g=new Group(a,b,obj(hashA1.get(playerNo)));
 						 
-						FileOutputStream outFile = new FileOutputStream("Group.obj");
-						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-						outObject.writeObject(a);
-						outObject.close();
-						outFile.close();
+						if(serch(a)) {
+							forwardMessage("gfalse",playerNo);
+							
+							
+						}else {
+							forwardMessage("gtrue",playerNo);
+							FileOutputStream outFile = new FileOutputStream("Group.obj",true);
+							ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+							outObject.writeObject(a);
+							outObject.close();
+							outFile.close();
+						}
+						
+						
+						
+						
 						
 						
 					}
@@ -387,7 +398,7 @@ public class Ser2 {
 						Group g=chat(group);
 						g.setchat(p);
 						
-						FileOutputStream outFile = new FileOutputStream("Question.obj");
+						FileOutputStream outFile = new FileOutputStream("Question.obj",true);
 						ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 						outObject.writeObject(p);
 						outObject.close();
@@ -486,7 +497,7 @@ public class Ser2 {
 						
 					}
 					if(inputLine.equals("オファー拒否")) {
-						String name = hashA1.get(playerNo);//選んだ回答者の名前を取得
+						//String name = hashA1.get(playerNo);//選んだ回答者の名前を取得
 						a= br[playerNo].readLine();//質問内容を受信
 						
 						Question k=ques(a);
@@ -919,7 +930,7 @@ try {
 		
 		
 		
-		FileOutputStream outFile = new FileOutputStream("Question.obj");
+		FileOutputStream outFile = new FileOutputStream("Question.obj",true);
 		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 		for(Question r:a) {
 		
@@ -969,7 +980,7 @@ try {
 		
 		
 		
-		FileOutputStream outFile = new FileOutputStream("Question.obj");
+		FileOutputStream outFile = new FileOutputStream("Question.obj",true);
 		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 		for(Question r:a) {
 		
@@ -1020,7 +1031,7 @@ try {
 		
 		
 		
-		FileOutputStream outFile = new FileOutputStream("User.obj");//ここは上書きではなくすべて書き出すのでtrue　なし
+		FileOutputStream outFile = new FileOutputStream("User.obj",true);//ここは上書きではなくすべて書き出すのでtrue　なし
 		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 		for(User r:a) {
 		
@@ -1071,7 +1082,7 @@ try {
 	
 	
 	
-	FileOutputStream outFile = new FileOutputStream("User.obj");//ここは上書きではなくすべて書き出すのでtrue　なし
+	FileOutputStream outFile = new FileOutputStream("User.obj",true);//ここは上書きではなくすべて書き出すのでtrue　なし
 	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 	for(User r:a) {
 	
@@ -1095,7 +1106,7 @@ try {
 		String k = "";
 
 		try {
-		FileOutputStream outFile = new FileOutputStream("User.obj");
+		FileOutputStream outFile = new FileOutputStream("User.obj",true);
 		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 		
 			
@@ -1442,14 +1453,14 @@ public static void main(String[] args) { //main
 		try {
 		
 			
-		 FileOutputStream outFile = new FileOutputStream("User.obj");
+		 FileOutputStream outFile = new FileOutputStream("User.obj",true);
 		 ObjectOutputStream outObject = new ObjectOutputStream(outFile);
          User u=new User("dammy","dammy","りんご");
          outObject.writeObject(u);
 		 outObject.close();
          outFile.close();
          
-         FileOutputStream outFile1 = new FileOutputStream("Group.obj");
+         FileOutputStream outFile1 = new FileOutputStream("Group.obj",true);
 		 ObjectOutputStream outObject1 = new ObjectOutputStream(outFile1);
          Group g=new Group("dammy","dammy",u);
          outObject1.writeObject(g);
