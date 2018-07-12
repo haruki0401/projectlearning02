@@ -49,7 +49,7 @@ public class Ser4 {
 	static HashMap<String, ArrayList<String>> hashC4 = new HashMap<>();//名前、グループ
 
 	static HashMap<Integer,String> hashA1 = new HashMap<>();//playerNo,名前
-	static HashMap<String,Integer> hashA2 =new HashMap<>();//名前、playerNo
+	static HashMap<String,Integer> hashA2 =new HashMap<>();//名前、playerNo//ログインしている人と同じ名前でログインできないようにする
 	
 
 
@@ -262,7 +262,7 @@ public class Ser4 {
 
 							inObject1.close();
 							inFile1.close();
-							//break;
+							break;
 
 							} catch (ClassNotFoundException e) {
 								// TODO 自動生成された catch ブロック
@@ -305,7 +305,7 @@ public class Ser4 {
 
 							inObject1.close();
 							inFile1.close();
-							//break;
+							break;
 							} catch (ClassNotFoundException e) {
 								// TODO 自動生成された catch ブロック
 								e.printStackTrace();
@@ -562,7 +562,7 @@ public class Ser4 {
 
 
 						}catch(java.io.EOFException e) {
-
+							
 							forwardMessage(String.valueOf(myq.size()), playerNo);
 
 							int flag = 0;
