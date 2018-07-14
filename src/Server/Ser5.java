@@ -15,76 +15,78 @@ import java.util.HashMap;
 
 public class Server {
 
-	private static int maxconnection = 105;//100l‚ªÅ‘åÚ‘±l”
+	private static int maxconnection = 105;//100äººãŒæœ€å¤§æ¥ç¶šäººæ•°
 
-	private int port; // ƒT[ƒo‚Ì‘Ò‚¿ó‚¯ƒ|[ƒg
+	private int port; // ã‚µãƒ¼ãƒã®å¾…ã¡å—ã‘ãƒãƒ¼ãƒˆ
 
-	private boolean[] online; //ƒIƒ“ƒ‰ƒCƒ“ó‘ÔŠÇ——p”z—ñ
+	private boolean[] online; //ã‚ªãƒ³ãƒ©ã‚¤ãƒ³çŠ¶æ…‹ç®¡ç†ç”¨é…åˆ—
 
-	private PrintWriter[] out; //ƒf[ƒ^‘—M—pƒIƒuƒWƒFƒNƒg
+	private PrintWriter[] out; //ãƒ‡ãƒ¼ã‚¿é€ä¿¡ç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 
-	//private ObjectInputStream[] ois;              /*  ƒIƒuƒWƒFƒNƒg“ü—ÍƒXƒgƒŠ[ƒ€  */
+	//private ObjectInputStream[] ois;              /*  ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆå…¥åŠ›ã‚¹ãƒˆãƒªãƒ¼ãƒ   */
 
-	private ObjectOutputStream[] oos;//o—Í—p
+	private ObjectOutputStream[] oos;//å‡ºåŠ›ç”¨
 
-	private Receiver[] receiver; //ƒf[ƒ^óM—pƒIƒuƒWƒFƒNƒg
+	private Receiver[] receiver; //ãƒ‡ãƒ¼ã‚¿å—ä¿¡ç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 
-	private static int member;//Ú‘±‚µ‚Ä‚¢‚él‚Ìl”
+	private static int member;//æ¥ç¶šã—ã¦ã„ã‚‹äººã®äººæ•°
 
-	private static Socket[] socket;//ó•t—p‚Ìƒ\ƒPƒbƒg
+	private static Socket[] socket;//å—ä»˜ç”¨ã®ã‚½ã‚±ãƒƒãƒˆ
 
 	private static boolean[] login;
 
-	//private static int hut=0;//ì¬‚³‚ê‚Ä‚¢‚é“ñl‚Ìƒ`ƒƒƒbƒg”
+	//private static int hut=0;//ä½œæˆã•ã‚Œã¦ã„ã‚‹äºŒäººã®ãƒãƒ£ãƒƒãƒˆæ•°
 
-	static HashMap<String, String> hashD1 = new HashMap<>();//hash1‚ÍƒvƒŒƒCƒ„‚Ì”FØ‚È‚Ç
+	static HashMap<String, String> hashD1 = new HashMap<>();//hash1ã¯ãƒ—ãƒ¬ã‚¤ãƒ¤ã®èªè¨¼ãªã©
 	static HashMap<String, String> hashD2 = new HashMap<>();//hash2//key=aikotoba,value=password
-    static HashMap<String, String> hashD3 = new HashMap<>();//–¼‘OAE‹Æ
-	static HashMap<String, String> hashD4 = new HashMap<>();//–¼‘OAŠ‘®
-	static HashMap<String, String> hashD5 = new HashMap<>();//–¼‘OA‡Œ¾—t
+    static HashMap<String, String> hashD3 = new HashMap<>();//åå‰ã€è·æ¥­
+	static HashMap<String, String> hashD4 = new HashMap<>();//åå‰ã€æ‰€å±
+	static HashMap<String, String> hashD5 = new HashMap<>();//åå‰ã€åˆè¨€è‘‰
 
-	static HashMap<String, Double> hashC1 = new HashMap<>();//–¼‘OA•]‰¿’l
-	static HashMap<String, Integer> hashC2 = new HashMap<>();//–¼‘OA¿–â”
-	static HashMap<String, Integer> hashC3 = new HashMap<>();//–¼‘OA‰ñ“š”
-	static HashMap<String, ArrayList<String>> hashC4 = new HashMap<>();//–¼‘OAƒOƒ‹[ƒv
+	static HashMap<String, Double> hashC1 = new HashMap<>();//åå‰ã€è©•ä¾¡å€¤
+	static HashMap<String, Integer> hashC2 = new HashMap<>();//åå‰ã€è³ªå•æ•°
+	static HashMap<String, Integer> hashC3 = new HashMap<>();//åå‰ã€å›ç­”æ•°
+	static HashMap<String, ArrayList<String>> hashC4 = new HashMap<>();//åå‰ã€ã‚°ãƒ«ãƒ¼ãƒ—
 
-	static HashMap<Integer,String> hashA1 = new HashMap<>();//playerNo,–¼‘O
-	static HashMap<String,Integer> hashA2 =new HashMap<>();//–¼‘OAplayerNo//ƒƒOƒCƒ“‚µ‚Ä‚¢‚él‚Æ“¯‚¶–¼‘O‚ÅƒƒOƒCƒ“‚Å‚«‚È‚¢‚æ‚¤‚É‚·‚é
-
-
-
-	static HashMap<String, String> hashA8 = new HashMap<>();//“ñl‚Åî•ñ‚ğ‚â‚èæ‚è‚·‚é‚½‚ß‚Ì•R‚Ã‚¯
+	static HashMap<Integer,String> hashA1 = new HashMap<>();//playerNo,åå‰
+	static HashMap<String,Integer> hashA2 =new HashMap<>();//åå‰ã€playerNo//ãƒ­ã‚°ã‚¤ãƒ³ã—ã¦ã„ã‚‹äººã¨åŒã˜åå‰ã§ãƒ­ã‚°ã‚¤ãƒ³ã§ããªã„ã‚ˆã†ã«ã™ã‚‹
 
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 
-	public Server(int port) { //‘Ò‚¿ó‚¯ƒ|[ƒg‚ğˆø”‚Æ‚·‚é
+	static HashMap<String, String> hashA8 = new HashMap<>();//äºŒäººã§æƒ…å ±ã‚’ã‚„ã‚Šå–ã‚Šã™ã‚‹ãŸã‚ã®ç´ã¥ã‘
 
-		this.port = port; //‘Ò‚¿ó‚¯ƒ|[ƒg‚ğ“n‚·
+	//int flag = 0;		//ObjectOutputStreamã‚’ï¼‘å›ã ã‘é–‹ã‘ã‚‹ãŸã‚ã®åˆ¶å¾¡ã«ä½¿ã†
 
-		out = new PrintWriter[maxconnection]; //ƒf[ƒ^‘—M—pƒIƒuƒWƒFƒNƒg‚ğÅ‘ål”•ª—pˆÓ
+
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+
+	public Server(int port) { //å¾…ã¡å—ã‘ãƒãƒ¼ãƒˆã‚’å¼•æ•°ã¨ã™ã‚‹
+
+		this.port = port; //å¾…ã¡å—ã‘ãƒãƒ¼ãƒˆã‚’æ¸¡ã™
+
+		out = new PrintWriter[maxconnection]; //ãƒ‡ãƒ¼ã‚¿é€ä¿¡ç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æœ€å¤§äººæ•°åˆ†ç”¨æ„
 		oos = new ObjectOutputStream[maxconnection];
-		receiver = new Receiver[maxconnection]; //ƒf[ƒ^óM—pƒIƒuƒWƒFƒNƒg‚ğÅ‘ål”•ª—pˆÓ
+		receiver = new Receiver[maxconnection]; //ãƒ‡ãƒ¼ã‚¿å—ä¿¡ç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æœ€å¤§äººæ•°åˆ†ç”¨æ„
 
-		online = new boolean[maxconnection];//ƒIƒ“ƒ‰ƒCƒ“ó‘ÔŠÇ——p”z—ñ‚ğ—pˆÓ
+		online = new boolean[maxconnection];//ã‚ªãƒ³ãƒ©ã‚¤ãƒ³çŠ¶æ…‹ç®¡ç†ç”¨é…åˆ—ã‚’ç”¨æ„
 
-		login = new boolean[maxconnection];//”FØ‚ğ“Ë”j‚µ‚½l
+		login = new boolean[maxconnection];//èªè¨¼ã‚’çªç ´ã—ãŸäºº
 		socket=new Socket[maxconnection];
 
 
 	}
 
-	//ƒf[ƒ^óM—pƒXƒŒƒbƒh(“à•”ƒNƒ‰ƒX)
+	//ãƒ‡ãƒ¼ã‚¿å—ä¿¡ç”¨ã‚¹ãƒ¬ãƒƒãƒ‰(å†…éƒ¨ã‚¯ãƒ©ã‚¹)
 
 	class Receiver extends Thread {
 
-		private InputStreamReader[] sisr; //óMƒf[ƒ^—p•¶šƒXƒgƒŠ[ƒ€
+		private InputStreamReader[] sisr; //å—ä¿¡ãƒ‡ãƒ¼ã‚¿ç”¨æ–‡å­—ã‚¹ãƒˆãƒªãƒ¼ãƒ 
 
-		private BufferedReader[] br; //•¶šƒXƒgƒŠ[ƒ€—p‚Ìƒoƒbƒtƒ@
+		private BufferedReader[] br; //æ–‡å­—ã‚¹ãƒˆãƒªãƒ¼ãƒ ç”¨ã®ãƒãƒƒãƒ•ã‚¡
 
-		private int playerNo;//ƒvƒŒƒCƒ„‚ğ¯•Ê‚·‚é‚½‚ß‚Ì”Ô†
+		private int playerNo;//ãƒ—ãƒ¬ã‚¤ãƒ¤ã‚’è­˜åˆ¥ã™ã‚‹ãŸã‚ã®ç•ªå·
 
-		// “à•”ƒNƒ‰ƒXReceiver‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^
+		// å†…éƒ¨ã‚¯ãƒ©ã‚¹Receiverã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 
 		Receiver(Socket socket, int playerNo) {
 
@@ -94,7 +96,7 @@ public class Server {
 
 			try {
 
-				this.playerNo = playerNo; //ƒvƒŒƒCƒ„”Ô†‚ğ“n‚·
+				this.playerNo = playerNo; //ãƒ—ãƒ¬ã‚¤ãƒ¤ç•ªå·ã‚’æ¸¡ã™
 
 				sisr[playerNo] = new InputStreamReader(socket.getInputStream());
 
@@ -102,13 +104,13 @@ public class Server {
 
 			} catch (IOException e) {
 
-				System.err.println("ƒf[ƒ^óM‚ÉƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
+				System.err.println("ãƒ‡ãƒ¼ã‚¿å—ä¿¡æ™‚ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
 
 			}
 
 		}
 
-		// “à•”ƒNƒ‰ƒX Receiver‚Ìƒƒ\ƒbƒh
+		// å†…éƒ¨ã‚¯ãƒ©ã‚¹ Receiverã®ãƒ¡ã‚½ãƒƒãƒ‰
 
 		@Override
 
@@ -116,18 +118,18 @@ public class Server {
 
 			try {
 				if(member >= 100) {
-					forwardMessage("Å‘åÚ‘±l”‚ğ’´‚¦‚Ä‚¢‚é‚½‚ßAÚ‘±‚ğØ‚è‚Ü‚·", playerNo);
+					forwardMessage("æœ€å¤§æ¥ç¶šäººæ•°ã‚’è¶…ãˆã¦ã„ã‚‹ãŸã‚ã€æ¥ç¶šã‚’åˆ‡ã‚Šã¾ã™", playerNo);
 					socket[playerNo].close();
 
 				}
 
 				//int aite = 0;
 
-				while(true) {// ƒf[ƒ^‚ğóM‚µ‘±‚¯‚é
+				while(true) {// ãƒ‡ãƒ¼ã‚¿ã‚’å—ä¿¡ã—ç¶šã‘ã‚‹
 
 
 
-					String inputLine = br[playerNo].readLine();//ƒf[ƒ^‚ğˆês•ª“Ç‚İ‚Ş
+					String inputLine = br[playerNo].readLine();//ãƒ‡ãƒ¼ã‚¿ã‚’ä¸€è¡Œåˆ†èª­ã¿è¾¼ã‚€
 
 					String a = "";
 
@@ -137,7 +139,7 @@ public class Server {
 
 					String d="";
 
-					if(inputLine.equals("”FØ")) {
+					if(inputLine.equals("èªè¨¼")) {
 
 						a = br[playerNo].readLine();
 
@@ -153,7 +155,7 @@ public class Server {
 
 							forwardMessage("ltrue", playerNo);
 
-							forwarddammy(playerNo);		//V‚µ‚¢ObjectoutputStream‚ğŠJ‚¯‚é‚½‚ß‚Ég—p
+							forwarddammy(playerNo);		//æ–°ã—ã„ObjectoutputStreamã‚’é–‹ã‘ã‚‹ãŸã‚ã«ä½¿ç”¨
 
 							hashA1.put(playerNo, a);
 							hashA2.put(a,playerNo );
@@ -168,7 +170,7 @@ public class Server {
 
 					}
 
-					if(inputLine.equals("V‹K“o˜^")) {
+					if(inputLine.equals("æ–°è¦ç™»éŒ²")) {
 
 						a = br[playerNo].readLine();
 
@@ -183,9 +185,9 @@ public class Server {
 						if(k.equals("rtrue")) {
 							forwardMessage("rtrue", playerNo);
 
-							forwarddammy(playerNo);		//V‚µ‚¢ObjectoutputStream‚ğŠJ‚¯‚é‚½‚ß‚Ég—p
+							forwarddammy(playerNo);		//æ–°ã—ã„ObjectoutputStreamã‚’é–‹ã‘ã‚‹ãŸã‚ã«ä½¿ç”¨
 
-							System.out.println("ƒ_ƒ~[‘—M¬Œ÷");
+System.out.println("ãƒ€ãƒŸãƒ¼é€ä¿¡æˆåŠŸ");
 
 							User user=obj(a);
 						} else {
@@ -197,7 +199,7 @@ public class Server {
 
 					}
 
-					if(inputLine.equals("–Y‚ê‚½l")) {
+					if(inputLine.equals("å¿˜ã‚ŒãŸäºº")) {
 
 						a = br[playerNo].readLine();
 
@@ -215,7 +217,7 @@ public class Server {
 						}
 
 					}
-					if(inputLine.equals("ƒƒOƒAƒEƒg")) {
+					if(inputLine.equals("ãƒ­ã‚°ã‚¢ã‚¦ãƒˆ")) {
 
 						if(logout(playerNo)) {
 
@@ -229,13 +231,13 @@ public class Server {
 					}
 
 
-					if(inputLine.equals("ŒÂlî•ñ")) {
+					if(inputLine.equals("å€‹äººæƒ…å ±")) {
 
-						a = br[playerNo].readLine();//E‹Æ
+						a = br[playerNo].readLine();//è·æ¥­
 
-						b = br[playerNo].readLine();//Š‘®
+						b = br[playerNo].readLine();//æ‰€å±
 
-						c=br[playerNo].readLine();//ƒOƒ‹[ƒv”
+						c=br[playerNo].readLine();//ã‚°ãƒ«ãƒ¼ãƒ—æ•°
 
 						int kazu=Integer.parseInt(c);
 
@@ -271,7 +273,7 @@ public class Server {
 							break;
 
 							} catch (ClassNotFoundException e) {
-								// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+								// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 								e.printStackTrace();
 
 							}
@@ -313,7 +315,7 @@ public class Server {
 							inFile1.close();
 							break;
 							} catch (ClassNotFoundException e) {
-								// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+								// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 								e.printStackTrace();
 							}
 
@@ -321,12 +323,12 @@ public class Server {
 
 						}
 						hashD3.put(hashA1.get(playerNo),a);
-						hashD4.put(hashA1.get(playerNo),b);//—v‘f‚Ì’u‚«Š·‚¦
+						hashD4.put(hashA1.get(playerNo),b);//è¦ç´ ã®ç½®ãæ›ãˆ
 						hashC4.put(hashA1.get(playerNo),u.getGroup());
 
 
 
-						unew(u);//ƒtƒ@ƒCƒ‹‚Ì’†g‚Ì‘‚«Š·‚¦
+						unew(u);//ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¸­èº«ã®æ›¸ãæ›ãˆ
 						Uhyouzi();
 
 
@@ -334,19 +336,19 @@ public class Server {
 					}
 
 
-					///ƒOƒ‹[ƒv‰»ƒ`ƒƒƒbƒg‹@”\
-					if(inputLine.equals("ƒOƒ‹[ƒvì¬")) {
-						a = br[playerNo].readLine();//ƒOƒ‹[ƒv–¼//“¯‚¶–¼‘O‚Í‚¾‚ß‚É‚µ‚æ‚¤‚Æv‚Á‚Ä‚¢‚é
-						b = br[playerNo].readLine();//ƒOƒ‹[ƒv‚Ìà–¾•¶
+					///ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ãƒãƒ£ãƒƒãƒˆæ©Ÿèƒ½
+					if(inputLine.equals("ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆ")) {
+						a = br[playerNo].readLine();//ã‚°ãƒ«ãƒ¼ãƒ—å//åŒã˜åå‰ã¯ã ã‚ã«ã—ã‚ˆã†ã¨æ€ã£ã¦ã„ã‚‹
+						b = br[playerNo].readLine();//ã‚°ãƒ«ãƒ¼ãƒ—ã®èª¬æ˜æ–‡
 						Group g=new Group(a,b,obj(hashA1.get(playerNo)));
 
 						if(serch(a)) {
 							forwardMessage("gfalse",playerNo);
-							System.out.println("gfalse‘—M¬Œ÷");
+System.out.println("gfalseé€ä¿¡æˆåŠŸ");
 
 						}else {
 							forwardMessage("gtrue",playerNo);
-							System.out.println("gtrue‘—M¬Œ÷");
+System.out.println("gtrueé€ä¿¡æˆåŠŸ");
 //							FileOutputStream outFile = new FileOutputStream("Group.obj");
 //							ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 //							outObject.writeObject(a);
@@ -367,9 +369,10 @@ public class Server {
 
 
 
-					if(inputLine.equals("“üº’†‚ÌƒOƒ‹[ƒvî•ñ")) {
-						a = br[playerNo].readLine();//î•ñ‚ª—~‚µ‚¢ƒOƒ‹[ƒv–¼
-						//‚»‚ÌƒOƒ‹[ƒv‚ÌƒIƒuƒWƒFƒNƒg‚ğæ“¾‚³‚¹‘—‚éB
+					if(inputLine.equals("å…¥å®¤ä¸­ã®ã‚°ãƒ«ãƒ¼ãƒ—æƒ…å ±")) {
+System.out.println("ã‚°ãƒ«ãƒ¼ãƒ—é€ä¿¡é–‹å§‹");
+						a = br[playerNo].readLine();//æƒ…å ±ãŒæ¬²ã—ã„ã‚°ãƒ«ãƒ¼ãƒ—å
+						//ãã®ã‚°ãƒ«ãƒ¼ãƒ—ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—ã•ã›é€ã‚‹ã€‚
 						if(chat(a)!=null) {
 
 							forwardgru(playerNo,chat(a));
@@ -381,8 +384,8 @@ public class Server {
 					}
 
 
-					if(inputLine.equals("ƒOƒ‹[ƒvŒŸõ")) {
-						a = br[playerNo].readLine();//ŒŸõ‚µ‚½‚¢ƒOƒ‹[ƒv–¼‚Ìæ“¾
+					if(inputLine.equals("ã‚°ãƒ«ãƒ¼ãƒ—æ¤œç´¢")) {
+						a = br[playerNo].readLine();//æ¤œç´¢ã—ãŸã„ã‚°ãƒ«ãƒ¼ãƒ—åã®å–å¾—
 
 						if(serch(a)) {
 							forwardMessage("gtrue",playerNo);
@@ -396,21 +399,21 @@ public class Server {
 
 
 
-					if(inputLine.equals("¿–â“à—e")) {
+					if(inputLine.equals("è³ªå•å†…å®¹")) {
 
-						a=br[playerNo].readLine();//¿–â“à—e‚ÌóM
-						b=br[playerNo].readLine();//ƒOƒ‹[ƒv–¼
-						c=br[playerNo].readLine();/////¿–â‚ÌƒRƒCƒ“‚à’Ç‰Á
+						a=br[playerNo].readLine();//è³ªå•å†…å®¹ã®å—ä¿¡
+						b=br[playerNo].readLine();//ã‚°ãƒ«ãƒ¼ãƒ—å
+						c=br[playerNo].readLine();/////è³ªå•ã®ã‚³ã‚¤ãƒ³ã‚‚è¿½åŠ 
 						int coin=Integer.parseInt(c);
 						String name=hashA1.get(playerNo);
 						//String group=hashA2.get(playerNo);
 						String group=b;
-						User ques=obj(name);//¿–âÒ‚ÌƒIƒuƒWƒFƒNƒgŠm•Û
+						User ques=obj(name);//è³ªå•è€…ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç¢ºä¿
 
 						ques.setQuestion();
 						hashC2.put(name,ques.getQuestion());
-						ques.minusCoin(coin);//“q‚¯‚½ƒRƒCƒ“‚Ì•ª‚¾‚¯Œ¸‚ç‚·B
-						unew(ques);//ƒtƒ@ƒCƒ‹‚ÌXV
+						ques.minusCoin(coin);//è³­ã‘ãŸã‚³ã‚¤ãƒ³ã®åˆ†ã ã‘æ¸›ã‚‰ã™ã€‚
+						unew(ques);//ãƒ•ã‚¡ã‚¤ãƒ«ã®æ›´æ–°
 
 						Question p=new Question(ques,a,group,coin);
 						Group g=chat(group);
@@ -428,8 +431,8 @@ public class Server {
 
 					}
 
-					if(inputLine.equals("‰ñ“š—§Œó•â")) {
-						a = br[playerNo].readLine();//‰ñ“š‚µ‚½‚¢•¶–Ê
+					if(inputLine.equals("å›ç­”ç«‹å€™è£œ")) {
+						a = br[playerNo].readLine();//å›ç­”ã—ãŸã„æ–‡é¢
 						String name=hashA1.get(playerNo);
 						User er=obj(name);
 						Question k=ques(a);
@@ -437,7 +440,7 @@ public class Server {
 					    	k.setCandidates(er);
 
 
-					    qnew(k);//ƒtƒ@ƒCƒ‹‚Ì“à—e‚ğXV
+					    qnew(k);//ãƒ•ã‚¡ã‚¤ãƒ«ã®å†…å®¹ã‚’æ›´æ–°
 					    }
 
 
@@ -446,7 +449,7 @@ public class Server {
 
 
 						}
-					if(inputLine.equals("ƒIƒtƒ@[—ˆ‚Ä‚é‚©‚È")) {
+					if(inputLine.equals("ã‚ªãƒ•ã‚¡ãƒ¼æ¥ã¦ã‚‹ã‹ãª")) {
 						String name=hashA1.get(playerNo);
 
 						FileInputStream inFile1 = new FileInputStream("Question.obj");
@@ -474,7 +477,7 @@ public class Server {
 
 							forwardMessage(String.valueOf(myo.size()), playerNo);
 
-							//int flag = 0;
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 
 							for(Question qu: myo) {
 								forwardq(playerNo,qu);
@@ -486,7 +489,7 @@ public class Server {
 						inFile1.close();
 						//break;
 						} catch (ClassNotFoundException e) {
-							// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+							// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 							e.printStackTrace();
 						}
 
@@ -496,9 +499,9 @@ public class Server {
 
 					}
 
-					if(inputLine.equals("ƒIƒtƒ@[l‘Io")) {
-						a = br[playerNo].readLine();//‘I‚ñ‚¾‰ñ“šÒ‚Ì–¼‘O‚ğæ“¾
-						b = br[playerNo].readLine();//¿–â“à—e‚ğóM
+					if(inputLine.equals("ã‚ªãƒ•ã‚¡ãƒ¼äººé¸å‡º")) {
+						a = br[playerNo].readLine();//é¸ã‚“ã å›ç­”è€…ã®åå‰ã‚’å–å¾—
+						b = br[playerNo].readLine();//è³ªå•å†…å®¹ã‚’å—ä¿¡
 
 						Question k=ques(b);
 						if(k!=null) {
@@ -507,8 +510,8 @@ public class Server {
 						qnew(k);
 						}
 					}
-					if(inputLine.equals("ƒIƒtƒ@[æ‚èÁ‚µ")) {
-						a= br[playerNo].readLine();//¿–â“à—e‚ğóM
+					if(inputLine.equals("ã‚ªãƒ•ã‚¡ãƒ¼å–ã‚Šæ¶ˆã—")) {
+						a= br[playerNo].readLine();//è³ªå•å†…å®¹ã‚’å—ä¿¡
 
 						Question k=ques(a);
 						if(k!=null) {
@@ -524,9 +527,9 @@ public class Server {
 						}
 
 					}
-					if(inputLine.equals("ƒIƒtƒ@[‹‘”Û")) {
-						//String name = hashA1.get(playerNo);//‘I‚ñ‚¾‰ñ“šÒ‚Ì–¼‘O‚ğæ“¾
-						a= br[playerNo].readLine();//¿–â“à—e‚ğóM
+					if(inputLine.equals("ã‚ªãƒ•ã‚¡ãƒ¼æ‹’å¦")) {
+						//String name = hashA1.get(playerNo);//é¸ã‚“ã å›ç­”è€…ã®åå‰ã‚’å–å¾—
+						a= br[playerNo].readLine();//è³ªå•å†…å®¹ã‚’å—ä¿¡
 
 						Question k=ques(a);
 						if(k!=null) {
@@ -541,14 +544,14 @@ public class Server {
 
 						}
 					}
-					if(inputLine.equals("©•ª‚ª‚µ‚½¿–â")) {
+					if(inputLine.equals("è‡ªåˆ†ãŒã—ãŸè³ªå•")) {
 						String name=hashA1.get(playerNo);
 
 						FileInputStream inFile1 = new FileInputStream("Question.obj");
 						ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 						Question q;
 						ArrayList<Question> myq = new ArrayList<Question>();
-						System.out.println("ƒƒ\ƒbƒhÀs");
+//System.out.println("ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œ");
 
 						try {
 
@@ -557,10 +560,10 @@ public class Server {
 						q = (Question)inObject1.readObject();
 						//System.out.println(q.getQuestion());
 						if(q.getQuestioner().getName().equals(name)) {
-							System.out.println(q.getQuestion());
+System.out.println(q.getQuestion());
 							myq.add(q);
 							//forwardq(playerNo,q);
-							//System.out.println("‘—M¬Œ÷");
+							//System.out.println("é€ä¿¡æˆåŠŸ");
 						}
 
 
@@ -572,13 +575,12 @@ public class Server {
 
 							forwardMessage(String.valueOf(myq.size()), playerNo);
 
-							forwardMessage(String.valueOf(myq.size()), playerNo);
+//forwardMessage(String.valueOf(myq.size()), playerNo);
 
-							//int flag = 0;
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 
 							for(Question qu: myq) {
 								forwardq(playerNo,qu);
-								//flag++;
 							}
 
 
@@ -588,7 +590,7 @@ public class Server {
 						inFile1.close();
 						//break;
 						} catch (ClassNotFoundException e) {
-							// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+							// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 							e.printStackTrace();
 						}
 
@@ -598,7 +600,7 @@ public class Server {
 
 
 					}
-					if(inputLine.equals("—§Œó•â‚µ‚Ä‚é¿–â")) {
+					if(inputLine.equals("ç«‹å€™è£œã—ã¦ã‚‹è³ªå•")) {
 						String name=hashA1.get(playerNo);
 
 						FileInputStream inFile1 = new FileInputStream("Question.obj");
@@ -629,7 +631,7 @@ public class Server {
 
 							forwardMessage(String.valueOf(myc.size()), playerNo);
 
-							//int flag = 0;
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 
 							for(Question qu: myc) {
 								forwardq(playerNo,qu);
@@ -641,7 +643,7 @@ public class Server {
 						inFile1.close();
 						//break;
 						} catch (ClassNotFoundException e) {
-							// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+							// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 							e.printStackTrace();
 						}
 
@@ -660,9 +662,9 @@ public class Server {
 
 
 
-					if(inputLine.equals("‰ñ“š")) {
-						a = br[playerNo].readLine();//‰ñ“š‚Ìæ“¾
-						b=br[playerNo].readLine();//¿–â“à—e
+					if(inputLine.equals("å›ç­”")) {
+						a = br[playerNo].readLine();//å›ç­”ã®å–å¾—
+						b=br[playerNo].readLine();//è³ªå•å†…å®¹
 						User u=obj(hashA1.get(playerNo));
 
 						Question k=ques(b);
@@ -672,14 +674,14 @@ public class Server {
 						 hashC3.put(hashA1.get(playerNo), u.getAnswer());
 						 k.setAnswerer(obj(hashA1.get(playerNo)));
 
-						 u.setAnswer();//‰ñ“š”‘‰Á
-						 u.plusCoin(k.getCoin());//¿–â‚ÉŒ‡‚¯‚ç‚ê‚Ä‚¢‚éƒRƒCƒ“‚Ì•ª‚¾‚¯‘«‚·B
+						 u.setAnswer();//å›ç­”æ•°å¢—åŠ 
+						 u.plusCoin(k.getCoin());//è³ªå•ã«æ¬ ã‘ã‚‰ã‚Œã¦ã„ã‚‹ã‚³ã‚¤ãƒ³ã®åˆ†ã ã‘è¶³ã™ã€‚
 
 
 
 
 
-						 unew(u);//ƒtƒ@ƒCƒ‹‚ÌXV
+						 unew(u);//ãƒ•ã‚¡ã‚¤ãƒ«ã®æ›´æ–°
 
 
 						 Group g=chat(group);
@@ -690,8 +692,8 @@ public class Server {
 					}
 
 
-					if(inputLine.equals("î•ñ")) {//ƒvƒŒƒCƒ„[‚Ì‘Sî•ñ‚ª‹l‚Ü‚Á‚½ƒIƒuƒWƒFƒNƒg‚ğ‘—‚éB
-						a = br[playerNo].readLine();//î•ñ‚ª—~‚µ‚¢l‚Ì–¼‘O
+					if(inputLine.equals("æƒ…å ±")) {//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å…¨æƒ…å ±ãŒè©°ã¾ã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’é€ã‚‹ã€‚
+						a = br[playerNo].readLine();//æƒ…å ±ãŒæ¬²ã—ã„äººã®åå‰
 						System.out.println(a);
 						User u=obj(a);
 						forwardu(playerNo, u);
@@ -706,9 +708,9 @@ public class Server {
 					}
 
 
-					if(inputLine.equals("•]‰¿’l•ÏX")) {
-						a = br[playerNo].readLine();//•]‰¿’l‚Ìæ“¾
-						b=br[playerNo].readLine();//¿–â“à—e‚Ìæ“¾
+					if(inputLine.equals("è©•ä¾¡å€¤å¤‰æ›´")) {
+						a = br[playerNo].readLine();//è©•ä¾¡å€¤ã®å–å¾—
+						b=br[playerNo].readLine();//è³ªå•å†…å®¹ã®å–å¾—
 						int val=Integer.parseInt(a);
 						Question q=ques(b);
 						q.setValue(val);
@@ -722,7 +724,7 @@ public class Server {
 						hen=Double.parseDouble(a);
 						kai=(double)hashC3.get(name);
 						value=hashC1.get(name);
-						value=(value/(kai-1)+hen)/kai;//•½‹Ï’l‚ğZo‚µ‚È‚¨‚µ‚Ä‚¢‚éB
+						value=(value/(kai-1)+hen)/kai;//å¹³å‡å€¤ã‚’ç®—å‡ºã—ãªãŠã—ã¦ã„ã‚‹ã€‚
 						hashC1.put(name,value);
 
 						User user=obj(name);
@@ -734,9 +736,9 @@ public class Server {
 
 
 
-				//////////////////’Ç‰Á/////////////////////////////
-				if(inputLine.equals("ƒRƒCƒ“w“ü")) {
-					a=br[playerNo].readLine();//ƒRƒCƒ“w“ü—Ê
+				//////////////////è¿½åŠ /////////////////////////////
+				if(inputLine.equals("ã‚³ã‚¤ãƒ³è³¼å…¥")) {
+					a=br[playerNo].readLine();//ã‚³ã‚¤ãƒ³è³¼å…¥é‡
 					int coin=Integer.parseInt(a);
 					User u=obj(hashA1.get(playerNo));
 					u.plusCoin(coin);
@@ -746,8 +748,8 @@ public class Server {
 
 
 
-				if(inputLine.equals("¿–âæ‚èÁ‚µ")) {//V‚µ‚­’Ç‰Á‚µ‚Ü‚µ‚½B
-					a=br[playerNo].readLine();//æ‚èÁ‚µ‚½‚¢¿–â“à—e‚ÌóM
+				if(inputLine.equals("è³ªå•å–ã‚Šæ¶ˆã—")) {//æ–°ã—ãè¿½åŠ ã—ã¾ã—ãŸã€‚
+					a=br[playerNo].readLine();//å–ã‚Šæ¶ˆã—ãŸã„è³ªå•å†…å®¹ã®å—ä¿¡
 					String name=hashA1.get(playerNo);
 					FileInputStream inFile1 = new FileInputStream("Question.obj");
 					ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
@@ -761,9 +763,9 @@ public class Server {
 					q = (Question)inObject1.readObject();
 					if(q.getQuestion().equals(a)) {
 						User u=obj(hashA1.get(playerNo));
-						u.plusCoin(q.getCoin());//¿–â‚É“q‚¯‚Ä‚¢‚½ƒRƒCƒ“‚ğ•Ô‚µ‚Ä‚à‚ç‚¤
-						unew(u);//playerƒtƒ@ƒCƒ‹‚ÌXV
-						qdelete(q);//—v‘f‚ğQuestion.obj‚©‚çíœ‚·‚é
+						u.plusCoin(q.getCoin());//è³ªå•ã«è³­ã‘ã¦ã„ãŸã‚³ã‚¤ãƒ³ã‚’è¿”ã—ã¦ã‚‚ã‚‰ã†
+						unew(u);//playerãƒ•ã‚¡ã‚¤ãƒ«ã®æ›´æ–°
+						qdelete(q);//è¦ç´ ã‚’Question.objã‹ã‚‰å‰Šé™¤ã™ã‚‹
 
 
 
@@ -783,7 +785,7 @@ public class Server {
 					inFile1.close();
 					//break;
 					} catch (ClassNotFoundException e) {
-						// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+						// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 						e.printStackTrace();
 					}
 
@@ -794,13 +796,13 @@ public class Server {
 
 				}
 
-			} catch (IOException e) { // Ú‘±‚ªØ‚ê‚½‚Æ‚«
+			} catch (IOException e) { // æ¥ç¶šãŒåˆ‡ã‚ŒãŸã¨ã
 
 
-				member--;//Ú‘±‚ªØ‚ê‚½l”•ªŒ¸‚ç‚·
+				member--;//æ¥ç¶šãŒåˆ‡ã‚ŒãŸäººæ•°åˆ†æ¸›ã‚‰ã™
 
 				login[playerNo]=false;
-				online[playerNo] = false; //ƒvƒŒƒCƒ„‚ÌÚ‘±ó‘Ô‚ğXV‚·‚é
+				online[playerNo] = false; //ãƒ—ãƒ¬ã‚¤ãƒ¤ã®æ¥ç¶šçŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
 				if(hashA1.containsKey(playerNo)) {
 					hashA2.remove(hashA1.get(playerNo));
 					hashA1.remove(playerNo);
@@ -816,24 +818,24 @@ public class Server {
 
 
 
-	///// ƒƒ\ƒbƒh///////////////////
-	public void acceptClient() { //ƒNƒ‰ƒCƒAƒ“ƒg‚ÌÚ‘±(ƒT[ƒo‚Ì‹N“®)
+	///// ãƒ¡ã‚½ãƒƒãƒ‰///////////////////
+	public void acceptClient() { //ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®æ¥ç¶š(ã‚µãƒ¼ãƒã®èµ·å‹•)
 
 		int n = 1;
 
-		member = 0;//’N‚àÚ‘±‚µ‚Ä‚¢‚È‚¢‚Æ‚«‚Í0
+		member = 0;//èª°ã‚‚æ¥ç¶šã—ã¦ã„ãªã„ã¨ãã¯0
 
 		try {
 
-			System.out.println("ƒT[ƒo‚ª‹N“®‚µ‚Ü‚µ‚½D");
+			System.out.println("ã‚µãƒ¼ãƒãŒèµ·å‹•ã—ã¾ã—ãŸï¼");
 
-			ServerSocket ss = new ServerSocket(port); //ƒT[ƒoƒ\ƒPƒbƒg‚ğ—pˆÓ
+			ServerSocket ss = new ServerSocket(port); //ã‚µãƒ¼ãƒã‚½ã‚±ãƒƒãƒˆã‚’ç”¨æ„
 
 			while(true) {
 
 				if(online[n] == false) {
 
-					socket[n] = ss.accept(); //V‹KÚ‘±‚ğó‚¯•t‚¯‚é
+					socket[n] = ss.accept(); //æ–°è¦æ¥ç¶šã‚’å—ã‘ä»˜ã‘ã‚‹
 
 					online[n] = true;
 
@@ -843,7 +845,7 @@ public class Server {
 
 					online[n] = true;
 
-					receiver[n].start();//ƒXƒŒƒbƒh‚ğ‹N“®©ƒRƒCƒc‚ğ‚Ç‚±‚Å”­“®‚·‚é‚©
+					receiver[n].start();//ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’èµ·å‹•â†ã‚³ã‚¤ãƒ„ã‚’ã©ã“ã§ç™ºå‹•ã™ã‚‹ã‹
 
 					member++;
 
@@ -851,7 +853,7 @@ public class Server {
 
 					n++;
 
-					if(n > 104) {//’
+					if(n > 104) {//æ³¨
 
 						n = 1;
 
@@ -863,87 +865,104 @@ public class Server {
 
 		} catch (Exception e) {
 
-			System.err.println("ƒ\ƒPƒbƒgì¬‚ÉƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½: " + e);
+			System.err.println("ã‚½ã‚±ãƒƒãƒˆä½œæˆæ™‚ã«ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ: " + e);
 
 		}
 
 	}
-	public void forwardMessage(String msg, int playerNo) { //‘€ìî•ñ‚Ì“]‘—
-		System.out.println(msg+" forwardMessage“à");
+	public void forwardMessage(String msg, int playerNo) { //æ“ä½œæƒ…å ±ã®è»¢é€
+System.out.println(msg+" forwardMessageå†…");
 
-		out[playerNo].println(msg);
+		try {
+			out[playerNo] = new PrintWriter(socket[playerNo].getOutputStream());
 
-		out[playerNo].flush();
+			out[playerNo].println(msg);
+
+			out[playerNo].flush();
+		} catch (IOException e) {
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
+			e.printStackTrace();
+		}
+
+
 
 
 
 	}
 
-	public void forwarddammy(int playerNo) {		//V‚µ‚¢ObjectoutputStream‚ğŠJ‚¯‚é‚½‚ß‚Ég—p
-		User dammy = new User("dammy", "dammy", "‚È‚µ");
+	public void forwarddammy(int playerNo) {		//æ–°ã—ã„ObjectoutputStreamã‚’é–‹ã‘ã‚‹ãŸã‚ã«ä½¿ç”¨
+		User dammy = new User("dammy", "dammy", "ãªã—");
 		try {
 			oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 			oos[playerNo].writeObject(dammy);
 			oos[playerNo].flush();
 			oos[playerNo].reset();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 	}
 
-	public void forwardu(int playerNo, User u) {
+	public void forwardu(int playerNo, User u/*, int flag*/) {
 		try {
+			//if(flag==0) {
+				//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+			/*}else {
+				oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
+			}*/
+System.out.println(u.getName()+" forwarduå†…");
 			oos[playerNo].writeObject(u);
 			oos[playerNo].flush();
 			oos[playerNo].reset();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 	}
 
 
-	public void forwardgru(int playerNo,Group a/*, int flag*/) {//ƒOƒ‹[ƒvƒIƒuƒWƒFƒNƒg‘—M
+	public void forwardgru(int playerNo,Group a/*, int flag*/) {//ã‚°ãƒ«ãƒ¼ãƒ—ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé€ä¿¡
 	try {
-		/*if(flag==0) {
-			oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-		}else {
-			oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
-		}*/
+		//if(flag==0) {
+			//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+		//}else {
+			//oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
+		//}
+System.out.println(a.getgname()+" forwardgruå†…");
+
 		oos[playerNo].writeObject(a);
 
 		oos[playerNo].flush();
 
 		oos[playerNo].reset();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
 }
 
-	public void forwardq(int playerNo,Question a/*, int flag*/) {//ƒNƒGƒXƒ`ƒ‡ƒ“ƒIƒuƒWƒFƒNƒg‘—M
+	public void forwardq(int playerNo,Question a/*, int flag*/) {//ã‚¯ã‚¨ã‚¹ãƒãƒ§ãƒ³ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé€ä¿¡
 	try {
-		/*if(flag==0) {
-			oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-		}else {
-			oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
-		}*/
-		System.out.println(a.getQuestion()+" forwardq“à");
+		//if(flag==0) {
+			//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+		//}else {*/
+			//oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
+		//}
+System.out.println(a.getQuestion()+" forwardqå†…");
 		oos[playerNo].writeObject(a);
 
 		oos[playerNo].flush();
 
 		oos[playerNo].reset();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
 }
 
-	public boolean ninsyou(String name, String pass) {//ƒvƒŒƒCƒ„‚Ì”FØ
+	public boolean ninsyou(String name, String pass) {//ãƒ—ãƒ¬ã‚¤ãƒ¤ã®èªè¨¼
 
 		User u;
 		try {
@@ -974,22 +993,22 @@ public class Server {
 			return false;
 		}
 		} catch (IOException e1) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e1.printStackTrace();
 
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 		return false;
-	//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+	//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
 
 	}
 
 
-	public void qwrite(Question k) {//Questionfile‚Ìã‘‚«
+	public void qwrite(Question k) {//Questionfileã®ä¸Šæ›¸ã
 
 		Question Q;
 		try {
@@ -1014,7 +1033,7 @@ try {
 			inFile1.close();
 
 			} catch (ClassNotFoundException e) {
-				// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+				// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 				e.printStackTrace();
 			}
 
@@ -1033,12 +1052,12 @@ try {
 
 		outFile.close();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 	}
-	public void qnew(Question k) {//Questionfile‚ÌXV
+	public void qnew(Question k) {//Questionfileã®æ›´æ–°
 
 		Question Q;
 		try {
@@ -1064,7 +1083,7 @@ try {
 			inFile1.close();
 
 			} catch (ClassNotFoundException e) {
-				// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+				// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 				e.printStackTrace();
 			}
 
@@ -1083,13 +1102,13 @@ try {
 
 		outFile.close();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 	}
 
-public void qdelete(Question k) {//Questionfile“à‚Ì—v‘f‚Ìíœ
+public void qdelete(Question k) {//Questionfileå†…ã®è¦ç´ ã®å‰Šé™¤
 
 		Question Q;
 		try {
@@ -1114,7 +1133,7 @@ try {
 			inFile1.close();
 
 			} catch (ClassNotFoundException e) {
-				// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+				// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 				e.printStackTrace();
 			}
 
@@ -1133,13 +1152,13 @@ try {
 
 		outFile.close();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 	}
 
-public void unew(User u) {//User.faile‚ÌXV
+public void unew(User u) {//User.faileã®æ›´æ–°
 
 		User U;;
 		try {
@@ -1166,14 +1185,14 @@ try {
 
 
 			} catch (ClassNotFoundException e) {
-				// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+				// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 				e.printStackTrace();
 			}
 
 
 
 
-		FileOutputStream outFile = new FileOutputStream("User.obj");//‚±‚±‚Íã‘‚«‚Å‚Í‚È‚­‚·‚×‚Ä‘‚«o‚·‚Ì‚Åtrue@‚È‚µ
+		FileOutputStream outFile = new FileOutputStream("User.obj");//ã“ã“ã¯ä¸Šæ›¸ãã§ã¯ãªãã™ã¹ã¦æ›¸ãå‡ºã™ã®ã§trueã€€ãªã—
 		ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 		for(User r:a) {
 
@@ -1185,12 +1204,12 @@ try {
 
 		outFile.close();
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 	}
-public void uwrite(User u) {//User.faile‚ÌXV
+public void uwrite(User u) {//User.faileã®æ›´æ–°
 
 	User U;;
 	try {
@@ -1215,14 +1234,14 @@ try {
 		inFile1.close();
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 
 
 
-	FileOutputStream outFile = new FileOutputStream("User.obj");//‚±‚±‚Íã‘‚«‚Å‚Í‚È‚­‚·‚×‚Ä‘‚«o‚·‚Ì‚Åtrue@‚È‚µ
+	FileOutputStream outFile = new FileOutputStream("User.obj");//ã“ã“ã¯ä¸Šæ›¸ãã§ã¯ãªãã™ã¹ã¦æ›¸ãå‡ºã™ã®ã§trueã€€ãªã—
 	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 	for(User r:a) {
 
@@ -1234,13 +1253,13 @@ try {
 
 	outFile.close();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
 }
 
-public void gnew(Group g) {//Group.faile‚ÌXV
+public void gnew(Group g) {//Group.faileã®æ›´æ–°
 
 	Group G;
 	try {
@@ -1266,14 +1285,14 @@ try {
 		inFile1.close();
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 
 
 
-	FileOutputStream outFile = new FileOutputStream("Group.obj");//‚±‚±‚Íã‘‚«‚Å‚Í‚È‚­‚·‚×‚Ä‘‚«o‚·‚Ì‚Åtrue@‚È‚µ
+	FileOutputStream outFile = new FileOutputStream("Group.obj");//ã“ã“ã¯ä¸Šæ›¸ãã§ã¯ãªãã™ã¹ã¦æ›¸ãå‡ºã™ã®ã§trueã€€ãªã—
 	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 	for(Group r:a) {
 
@@ -1285,13 +1304,13 @@ try {
 
 	outFile.close();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
 }
 
-public void udelete(User u) {//User.faile‚ÌXV
+public void udelete(User u) {//User.faileã®æ›´æ–°
 
 	User U;;
 	try {
@@ -1317,14 +1336,14 @@ try {
 		inFile1.close();
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 
 
 
-	FileOutputStream outFile = new FileOutputStream("User.obj");//‚±‚±‚Íã‘‚«‚Å‚Í‚È‚­‚·‚×‚Ä‘‚«o‚·‚Ì‚Åtrue@‚È‚µ
+	FileOutputStream outFile = new FileOutputStream("User.obj");//ã“ã“ã¯ä¸Šæ›¸ãã§ã¯ãªãã™ã¹ã¦æ›¸ãå‡ºã™ã®ã§trueã€€ãªã—
 	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 	for(User r:a) {
 
@@ -1336,13 +1355,13 @@ try {
 
 	outFile.close();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
 }
 
-public void gwrite(Group g) {//Group.faile‚Ìã‘‚«
+public void gwrite(Group g) {//Group.faileã®ä¸Šæ›¸ã
 
 	Group G;
 	try {
@@ -1366,14 +1385,14 @@ try {
 		inFile1.close();
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
 
 
 
-	FileOutputStream outFile = new FileOutputStream("Group.obj");//‚±‚±‚Íã‘‚«‚Å‚Í‚È‚­‚·‚×‚Ä‘‚«o‚·‚Ì‚Åtrue@‚È‚µ
+	FileOutputStream outFile = new FileOutputStream("Group.obj");//ã“ã“ã¯ä¸Šæ›¸ãã§ã¯ãªãã™ã¹ã¦æ›¸ãå‡ºã™ã®ã§trueã€€ãªã—
 	ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 	for(Group r:a) {
 
@@ -1385,7 +1404,7 @@ try {
 
 	outFile.close();
 	} catch (IOException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 
@@ -1393,7 +1412,7 @@ try {
 
 
 
-	public String newpeople(String a, String b, String c) {//V‹K“o˜^‚Ì”FØ
+	public String newpeople(String a, String b, String c) {//æ–°è¦ç™»éŒ²ã®èªè¨¼
 
 		String k = "";
 
@@ -1403,18 +1422,18 @@ try {
 
 
 
-			if(!c.matches("^[‚Ÿ-‚ñ[]*$")) {
-				k = "‡Œ¾—t‚Í‚Ğ‚ç‚ª‚È‚Ì‚İ‚Å‚·";
+			if(!c.matches("^[ã-ã‚“ãƒ¼]*$")) {
+				k = "åˆè¨€è‘‰ã¯ã²ã‚‰ãŒãªã®ã¿ã§ã™";
 
-			} else if(!a.matches("^[0-9a-zA-Z]*$") || !b.matches("^[0-9a-zA-Z]*$")) {//‡Œ¾—t‚Ì‚Ğ‚ç‚ª‚È”»’èA³‹K•\Œ»
-				k = "–¼‘O‚ÆƒpƒXƒ[ƒh‚Í”¼Šp‰p”š‚Å‚·";
+			} else if(!a.matches("^[0-9a-zA-Z]*$") || !b.matches("^[0-9a-zA-Z]*$")) {//åˆè¨€è‘‰ã®ã²ã‚‰ãŒãªåˆ¤å®šã€æ­£è¦è¡¨ç¾
+				k = "åå‰ã¨ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã¯åŠè§’è‹±æ•°å­—ã§ã™";
 
 			} else if(a.length() > 8) {
-				k = "–¼‘O‚ª8•¶šˆÈã‚Å‚·";
+				k = "åå‰ãŒ8æ–‡å­—ä»¥ä¸Šã§ã™";
 			} else if(b.length() > 16) {
-				k = "ƒpƒXƒ[ƒh‚ª16•¶šˆÈã‚Å‚·";
+				k = "ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ãŒ16æ–‡å­—ä»¥ä¸Šã§ã™";
 			}else if(hashD1.containsKey(a)) {
-				k="“¯‚¶–¼‘O‚Ìl‚ª‚¢‚Ü‚·";
+				k="åŒã˜åå‰ã®äººãŒã„ã¾ã™";
 			} else {
 				User u=new User(a,b,c);
 
@@ -1458,12 +1477,12 @@ try {
 			return k;
 
 	}
-	public boolean logout(int a) {//ƒƒOƒAƒEƒgˆ—
+	public boolean logout(int a) {//ãƒ­ã‚°ã‚¢ã‚¦ãƒˆå‡¦ç†
 
 		return true;
 
 	}
-public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
+public static Group chat(String name) { //ã‚°ãƒ«ãƒ¼ãƒ—ã®ãƒãƒ£ãƒƒãƒˆæƒ…å ±å–å¾—
 
 	Group gu;
 	try {
@@ -1493,18 +1512,18 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 		return null;
 	}
 	} catch (IOException e1) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e1.printStackTrace();
 
 
 	} catch (ClassNotFoundException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 	return null;
-//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
-}public Question ques(String Q) { //ƒNƒGƒXƒ`ƒ‡ƒ“æ“¾
+}public Question ques(String Q) { //ã‚¯ã‚¨ã‚¹ãƒãƒ§ãƒ³å–å¾—
 
 	Question q;
 	try {
@@ -1533,19 +1552,19 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 		return null;
 	}
 	} catch (IOException e1) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e1.printStackTrace();
 
 
 	} catch (ClassNotFoundException e) {
-		// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 		e.printStackTrace();
 	}
 	return null;
-//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
 }
-	public static boolean serch(String name) {//–¼‘O‚©‚çƒOƒ‹[ƒv‚ğŒŸõ
+	public static boolean serch(String name) {//åå‰ã‹ã‚‰ã‚°ãƒ«ãƒ¼ãƒ—ã‚’æ¤œç´¢
 		Group gu;
 		try {
 		FileInputStream inFile1 = new FileInputStream("Group.obj");
@@ -1573,23 +1592,23 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 			return false;
 		}
 		} catch (IOException e1) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e1.printStackTrace();
 
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 		return false;
-	//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+	//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
 	}
 
 
 
 
-	public String forgetman(String a, String b) {//–Y‚ê‚½l‚ÉƒpƒXƒ[ƒh‚ğ•Ô‚·B//–¼‘O‚Æ‡Œ¾—t‚©‚ç
+	public String forgetman(String a, String b) {//å¿˜ã‚ŒãŸäººã«ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’è¿”ã™ã€‚//åå‰ã¨åˆè¨€è‘‰ã‹ã‚‰
 
 
 			String key1 = hashD1.get(a);
@@ -1617,7 +1636,7 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 		}
 
 
-	public User obj(String name) {//user‚ÌƒIƒuƒWƒFƒNƒg¶¬A•Ê‚Éƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Ä‚à‚¢‚¢‚ªAƒtƒ@ƒCƒ‹‚Í‚È‚é‚×‚­ŠJ‚«‚½‚­‚È‚¢‚©‚çƒnƒbƒVƒ…‚Åˆ—
+	public User obj(String name) {//userã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆã€åˆ¥ã«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦ã‚‚ã„ã„ãŒã€ãƒ•ã‚¡ã‚¤ãƒ«ã¯ãªã‚‹ã¹ãé–‹ããŸããªã„ã‹ã‚‰ãƒãƒƒã‚·ãƒ¥ã§å‡¦ç†
 
 
 
@@ -1647,8 +1666,8 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 
 
 	}
-	/////////////////////////////ƒT[ƒo[—p‚Ìƒƒ\ƒbƒh//////////////////////////////////////////////
-	public void Uhyouzi() {//Œ»İ‚Ì“o˜^‚µ‚Ä‚¢‚éƒAƒJƒEƒ“ƒgî•ñŠm”F
+	/////////////////////////////ã‚µãƒ¼ãƒãƒ¼ç”¨ã®ãƒ¡ã‚½ãƒƒãƒ‰//////////////////////////////////////////////
+	public void Uhyouzi() {//ç¾åœ¨ã®ç™»éŒ²ã—ã¦ã„ã‚‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ç¢ºèª
 		User u;
 		try {
 		FileInputStream inFile1 = new FileInputStream("User.obj");
@@ -1672,21 +1691,21 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 
 		}
 		} catch (IOException e1) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e1.printStackTrace();
 
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
-	//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+	//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
 
 
 	}
-	public void Ghyouzi() {//Œ»İ‚Ì“o˜^‚µ‚Ä‚¢‚éƒOƒ‹[ƒv–¼Šm”F
+	public void Ghyouzi() {//ç¾åœ¨ã®ç™»éŒ²ã—ã¦ã„ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—åç¢ºèª
 		Group g;
 		try {
 		FileInputStream inFile1 = new FileInputStream("Group.obj");
@@ -1710,23 +1729,23 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 
 		}
 		} catch (IOException e1) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e1.printStackTrace();
 
 
 		} catch (ClassNotFoundException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
-	//‚±‚±‚É‚Í“’B‚Å‚«‚È‚¢B
+	//ã“ã“ã«ã¯åˆ°é”ã§ããªã„ã€‚
 
 
 
 	}
 
 
-	public void ban(User u) {//ƒAƒJƒEƒ“ƒgBan—p
+	public void ban(User u) {//ã‚¢ã‚«ã‚¦ãƒ³ãƒˆBanç”¨
 		udelete(u);
 	}
 
@@ -1736,10 +1755,10 @@ public static Group chat(String name) { //ƒOƒ‹[ƒv‚Ìƒ`ƒƒƒbƒgî•ñæ“¾
 
 
 
-	/////////////mainƒƒ\ƒbƒh/////////////////////////////////////////////////
+	/////////////mainãƒ¡ã‚½ãƒƒãƒ‰/////////////////////////////////////////////////
 public static void main(String[] args) { //main
 
-		Server server = new Server(10084); //‘Ò‚¿ó‚¯ƒ|[ƒg10000”Ô‚ÅƒT[ƒoƒIƒuƒWƒFƒNƒg‚ğ€”õ
+		Server server = new Server(10020); //å¾…ã¡å—ã‘ãƒãƒ¼ãƒˆ10000ç•ªã§ã‚µãƒ¼ãƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æº–å‚™
 
 
 		try {
@@ -1747,7 +1766,7 @@ public static void main(String[] args) { //main
 
 		 FileOutputStream outFile = new FileOutputStream("User.obj");
 		 ObjectOutputStream outObject = new ObjectOutputStream(outFile);
-         User u=new User("dammy","dammy","‚è‚ñ‚²");
+         User u=new User("dammy","dammy","ã‚Šã‚“ã”");
          outObject.writeObject(u);
 		 outObject.close();
          outFile.close();
@@ -1772,11 +1791,11 @@ public static void main(String[] args) { //main
 
 
 		} catch (IOException e) {
-			// TODO ©“®¶¬‚³‚ê‚½ catch ƒuƒƒbƒN
+			// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸ catch ãƒ–ãƒ­ãƒƒã‚¯
 			e.printStackTrace();
 		}
 
-		server.acceptClient(); //ƒNƒ‰ƒCƒAƒ“ƒgó‚¯“ü‚ê‚ğŠJn
+		server.acceptClient(); //ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆå—ã‘å…¥ã‚Œã‚’é–‹å§‹
 }
 
 }
