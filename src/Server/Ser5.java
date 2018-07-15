@@ -13,15 +13,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Server {
+public class Ser5 {
 
-	private static int maxconnection = 105;//100人が最大接続人数
+	private static int maxconnection = 1000000;//100人が最大接続人数
 
 	private int port; // サーバの待ち受けポート
 
 	private boolean[] online; //オンライン状態管理用配列
 
 	private PrintWriter[] out; //データ送信用オブジェクト
+	
 
 	//private ObjectInputStream[] ois;              /*  オブジェクト入力ストリーム  */
 
@@ -60,7 +61,7 @@ public class Server {
 
 	//コンストラクタ
 
-	public Server(int port) { //待ち受けポートを引数とする
+	public Ser5(int port) { //待ち受けポートを引数とする
 
 		this.port = port; //待ち受けポートを渡す
 
@@ -187,7 +188,7 @@ public class Server {
 
 							forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
 
-System.out.println("ダミー送信成功");
+							System.out.println("ダミー送信成功");
 
 							User user=obj(a);
 						} else {
@@ -572,8 +573,10 @@ System.out.println(q.getQuestion());
 
 
 						}catch(java.io.EOFException e) {
-
-							forwardMessage(String.valueOf(myq.size()), playerNo);
+							
+							//System.out.println(myq.size()+"        "+String.valueOf(myq.size()));
+							String l=String.valueOf(myq.size());
+							forwardMessage(l, playerNo);
 
 //forwardMessage(String.valueOf(myq.size()), playerNo);
 
@@ -962,48 +965,30 @@ System.out.println(a.getQuestion()+" forwardq内");
 
 }
 
-	public boolean ninsyou(String name, String pass) {//プレイヤの認証
+	public boolean ninsyou(String name, String pass) {//1,プレイヤの認証
 
-		User u;
-		try {
-		FileInputStream inFile1 = new FileInputStream("User.obj");
-		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+		boolean nin = true;
 
+		if(hashD1.get(name) != null && hashD1.get(name).equals(pass)) {
 
+			for(int i = 1; i < 100000; i++) {
 
-		try {
+				if(login[i] == true) {
 
-		while(true) {
-		u = (User)inObject1.readObject();
-	    if(u.getName().equals(name)) {
-	    	if(u.getPassword().equals(name)) {
-	    	inObject1.close();
-			inFile1.close();
-	    	return true;
-	    	}
-	    }
-		}
+					if(hashA1.get(i).equals(name)) {
+						nin = false;
+					}
 
-		}catch(java.io.EOFException e) {
+				}
 
+			}
 
+			return nin;
 
-			inObject1.close();
-			inFile1.close();
+		} else {
+
 			return false;
 		}
-		} catch (IOException e1) {
-			// TODO 自動生成された catch ブロック
-			e1.printStackTrace();
-
-
-		} catch (ClassNotFoundException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-		return false;
-	//ここには到達できない。
-
 
 	}
 
@@ -1438,7 +1423,7 @@ try {
 				User u=new User(a,b,c);
 
 					ArrayList<String> g=new ArrayList<String>();
-					g.add("all");
+					g.add("グループなし");
 					uwrite(u);
 
 
@@ -1446,9 +1431,9 @@ try {
 
 					hashD2.put(c, b);
 
-					hashD3.put(a,"job");
+					hashD3.put(a,"登録なし");
 
-					hashD4.put(a,"belong");
+					hashD4.put(a,"登録なし");
 
 					hashD5.put(a, c);
 
@@ -1758,7 +1743,7 @@ public static Group chat(String name) { //グループのチャット情報取�
 	/////////////mainメソッド/////////////////////////////////////////////////
 public static void main(String[] args) { //main
 
-		Server server = new Server(10020); //待ち受けポート10000番でサーバオブジェクトを準備
+		Ser5 server = new Ser5(10020); //待ち受けポート10000番でサーバオブジェクトを準備
 
 
 		try {
@@ -1799,6 +1784,5 @@ public static void main(String[] args) { //main
 }
 
 }
-
 
 
