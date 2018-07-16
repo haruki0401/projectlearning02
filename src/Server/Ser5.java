@@ -13,16 +13,15 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Ser5 {
+public class Server {
 
-	private static int maxconnection = 1000000;//100人が最大接続人数
+	private static int maxconnection = 105;//100人が最大接続人数
 
 	private int port; // サーバの待ち受けポート
 
 	private boolean[] online; //オンライン状態管理用配列
 
 	private PrintWriter[] out; //データ送信用オブジェクト
-	
 
 	//private ObjectInputStream[] ois;              /*  オブジェクト入力ストリーム  */
 
@@ -56,12 +55,10 @@ public class Ser5 {
 
 	static HashMap<String, String> hashA8 = new HashMap<>();//二人で情報をやり取りするための紐づけ
 
-	//int flag = 0;		//ObjectOutputStreamを１回だけ開けるための制御に使う
-
 
 	//コンストラクタ
 
-	public Ser5(int port) { //待ち受けポートを引数とする
+	public Server(int port) { //待ち受けポートを引数とする
 
 		this.port = port; //待ち受けポートを渡す
 
@@ -155,8 +152,11 @@ public class Ser5 {
 						if(ninsyou(a, b)&&l) {
 
 							forwardMessage("ltrue", playerNo);
+							forwardMessage(String.valueOf(playerNo), playerNo);
 
 							forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
+
+System.out.println(playerNo+"番ログイン");
 
 							hashA1.put(playerNo, a);
 							hashA2.put(a,playerNo );
@@ -185,10 +185,11 @@ public class Ser5 {
 
 						if(k.equals("rtrue")) {
 							forwardMessage("rtrue", playerNo);
+							forwardMessage(String.valueOf(playerNo), playerNo);
 
 							forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
 
-							System.out.println("ダミー送信成功");
+System.out.println(playerNo+"番ログイン");
 
 							User user=obj(a);
 						} else {
@@ -223,6 +224,8 @@ public class Ser5 {
 						if(logout(playerNo)) {
 
 							login[playerNo] = false;
+
+System.out.println(playerNo+"番ログアウト");
 
 						}
 						hashA2.remove(hashA1.get(playerNo));
@@ -464,12 +467,14 @@ System.out.println("グループ送信開始");
 						while(true) {
 
 						q = (Question)inObject1.readObject();
-						if(q.getOffer().getName().equals(name)) {
-							myo.add(q);
-							//forwardq(playerNo,q,0);
+						if(q.checkOffered()) {
+							if(q.getOffer().getName().equals(name)) {
+								myo.add(q);
+								//forwardq(playerNo,q,0);
+							}
+
+
 						}
-
-
 						}
 
 
@@ -478,7 +483,8 @@ System.out.println("グループ送信開始");
 
 							forwardMessage(String.valueOf(myo.size()), playerNo);
 
-							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());	//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOOSを開ける
+							oos[playerNo].flush();
 
 							for(Question qu: myo) {
 								forwardq(playerNo,qu);
@@ -562,6 +568,7 @@ System.out.println("グループ送信開始");
 						//System.out.println(q.getQuestion());
 						if(q.getQuestioner().getName().equals(name)) {
 System.out.println(q.getQuestion());
+
 							myq.add(q);
 							//forwardq(playerNo,q);
 							//System.out.println("送信成功");
@@ -573,18 +580,18 @@ System.out.println(q.getQuestion());
 
 
 						}catch(java.io.EOFException e) {
-							
-							//System.out.println(myq.size()+"        "+String.valueOf(myq.size()));
-							String l=String.valueOf(myq.size());
-							forwardMessage(l, playerNo);
+
+							forwardMessage(String.valueOf(myq.size()), playerNo);
 
 //forwardMessage(String.valueOf(myq.size()), playerNo);
 
-							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());	//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOOSを開ける
+							oos[playerNo].flush();
 
 							for(Question qu: myq) {
 								forwardq(playerNo,qu);
 							}
+
 
 
 
@@ -634,7 +641,8 @@ System.out.println(q.getQuestion());
 
 							forwardMessage(String.valueOf(myc.size()), playerNo);
 
-							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());	//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOOSを開ける
+							oos[playerNo].flush();
 
 							for(Question qu: myc) {
 								forwardq(playerNo,qu);
@@ -700,13 +708,6 @@ System.out.println(q.getQuestion());
 						System.out.println(a);
 						User u=obj(a);
 						forwardu(playerNo, u);
-
-						/*oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-						oos[playerNo].writeObject(u);
-
-						oos[playerNo].flush();
-
-						oos[playerNo].reset();*/
 
 					}
 
@@ -876,18 +877,9 @@ System.out.println(q.getQuestion());
 	public void forwardMessage(String msg, int playerNo) { //操作情報の転送
 System.out.println(msg+" forwardMessage内");
 
-		try {
-			out[playerNo] = new PrintWriter(socket[playerNo].getOutputStream());
+		out[playerNo].println(msg);
 
-			out[playerNo].println(msg);
-
-			out[playerNo].flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-
-
+		out[playerNo].flush();
 
 
 
@@ -897,6 +889,7 @@ System.out.println(msg+" forwardMessage内");
 		User dammy = new User("dammy", "dammy", "なし");
 		try {
 			oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+			oos[playerNo].flush();
 			oos[playerNo].writeObject(dammy);
 			oos[playerNo].flush();
 			oos[playerNo].reset();
@@ -906,13 +899,8 @@ System.out.println(msg+" forwardMessage内");
 		}
 	}
 
-	public void forwardu(int playerNo, User u/*, int flag*/) {
+	public void forwardu(int playerNo, User u) {
 		try {
-			//if(flag==0) {
-				//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-			/*}else {
-				oos[playerNo] = new NonHeaderObjectOutputStream(socket[playerNo].getOutputStream());
-			}*/
 System.out.println(u.getName()+" forwardu内");
 			oos[playerNo].writeObject(u);
 			oos[playerNo].flush();
@@ -965,30 +953,48 @@ System.out.println(a.getQuestion()+" forwardq内");
 
 }
 
-	public boolean ninsyou(String name, String pass) {//1,プレイヤの認証
+	public boolean ninsyou(String name, String pass) {//プレイヤの認証
 
-		boolean nin = true;
+		User u;
+		try {
+		FileInputStream inFile1 = new FileInputStream("User.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
 
-		if(hashD1.get(name) != null && hashD1.get(name).equals(pass)) {
 
-			for(int i = 1; i < 100000; i++) {
 
-				if(login[i] == true) {
+		try {
 
-					if(hashA1.get(i).equals(name)) {
-						nin = false;
-					}
+		while(true) {
+		u = (User)inObject1.readObject();
+	    if(u.getName().equals(name)) {
+	    	if(u.getPassword().equals(name)) {
+	    	inObject1.close();
+			inFile1.close();
+	    	return true;
+	    	}
+	    }
+		}
 
-				}
+		}catch(java.io.EOFException e) {
 
-			}
 
-			return nin;
 
-		} else {
-
+			inObject1.close();
+			inFile1.close();
 			return false;
 		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+
+
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		return false;
+	//ここには到達できない。
+
 
 	}
 
@@ -1397,62 +1403,62 @@ try {
 
 
 
-	public String newpeople(String a, String b, String c) {//新規登録の認証
+public String newpeople(String a, String b, String c) {//新規登録の認証
 
-		String k = "";
-
-
-		//FileOutputStream outFile = new FileOutputStream("User.obj");
-		//ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+	String k = "";
 
 
-
-			if(!c.matches("^[ぁ-んー]*$")) {
-				k = "合言葉はひらがなのみです";
-
-			} else if(!a.matches("^[0-9a-zA-Z]*$") || !b.matches("^[0-9a-zA-Z]*$")) {//合言葉のひらがな判定、正規表現
-				k = "名前とパスワードは半角英数字です";
-
-			} else if(a.length() > 8) {
-				k = "名前が8文字以上です";
-			} else if(b.length() > 16) {
-				k = "パスワードが16文字以上です";
-			}else if(hashD1.containsKey(a)) {
-				k="同じ名前の人がいます";
-			} else {
-				User u=new User(a,b,c);
-
-					ArrayList<String> g=new ArrayList<String>();
-					g.add("グループなし");
-					uwrite(u);
+	//FileOutputStream outFile = new FileOutputStream("User.obj");
+	//ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 
 
-					hashD1.put(a, b);
 
-					hashD2.put(c, b);
+		if(!c.matches("^[ぁ-んー]*$")) {
+			k = "合言葉はひらがなのみです";
 
-					hashD3.put(a,"登録なし");
+		} else if(!a.matches("^[0-9a-zA-Z]*$") || !b.matches("^[0-9a-zA-Z]*$")) {//合言葉のひらがな判定、正規表現
+			k = "名前とパスワードは半角英数字です";
 
-					hashD4.put(a,"登録なし");
+		} else if(a.length() > 8) {
+			k = "名前が8文字以上です";
+		} else if(b.length() > 16) {
+			k = "パスワードが16文字以上です";
+		}else if(hashD1.containsKey(a)) {
+			k="同じ名前の人がいます";
+		} else {
+			User u=new User(a,b,c);
 
-					hashD5.put(a, c);
-
-					hashC1.put(a, u.getValue());
-
-					hashC2.put(a, 0);
-
-					hashC3.put(a,0);
-
-					hashC4.put(a,g);
+				ArrayList<String> g=new ArrayList<String>();
+				g.add("グループなし");
+				uwrite(u);
 
 
-				   // outObject.close();
+				hashD1.put(a, b);
 
-				   // outFile.close();
+				hashD2.put(c, b);
 
-				    k="rtrue";
+				hashD3.put(a,"登録なし");
 
-			}
+				hashD4.put(a,"登録なし");
+
+				hashD5.put(a, c);
+
+				hashC1.put(a, u.getValue());
+
+				hashC2.put(a, 0);
+
+				hashC3.put(a,0);
+
+				hashC4.put(a,g);
+
+
+			   // outObject.close();
+
+			   // outFile.close();
+
+			    k="rtrue";
+
+		}
 
 
 
@@ -1743,7 +1749,7 @@ public static Group chat(String name) { //グループのチャット情報取�
 	/////////////mainメソッド/////////////////////////////////////////////////
 public static void main(String[] args) { //main
 
-		Ser5 server = new Ser5(10020); //待ち受けポート10000番でサーバオブジェクトを準備
+		Server server = new Server(10030); //待ち受けポート10000番でサーバオブジェクトを準備
 
 
 		try {
@@ -1784,5 +1790,6 @@ public static void main(String[] args) { //main
 }
 
 }
+
 
 
