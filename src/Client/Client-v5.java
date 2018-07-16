@@ -22,7 +22,7 @@ public class Client {
 	private ArrayList<Question> mycandidacy = new ArrayList<Question>();		//自分が立候補した質問
 	private Group mygroup;													//グループ情報
 	private static String ipaddress = "localhost";
-	private static int port = 10020;
+	private static int port = 10030;
 
 	public boolean connectServer() {		//サーバとの接続
         try {
@@ -49,8 +49,11 @@ public class Client {
             out.flush();
             String isPer = in.readLine();
             if(isPer.equals("ltrue") == true) {  //ログイン認証された
+            	int playerNo = Integer.parseInt(in.readLine());
+            	System.out.println(playerNo+"番です");
             	ois = new ObjectInputStream(soc.getInputStream());		//新しいObjectInputStreamを開ける
             	User dammy = (User) ois.readObject();		//新しいOISを開けるためのdammyの取得
+            	//ois.reset();
             	System.out.println("ダミー受信成功");
                 return true;
             } else if(isPer.equals("lfalse") == true) {  //ログイン認証されなかった
@@ -80,7 +83,9 @@ public class Client {
             String isPer = in.readLine();
             System.out.println(isPer);
             if(isPer.equals("rtrue")) {  //新規作成できる
-            	ois = new ObjectInputStream(soc.getInputStream());		//新しいObjectInputStreamを開ける
+            	int playerNo = Integer.parseInt(in.readLine());
+            	System.out.println(playerNo+"番です");
+           		ois = new ObjectInputStream(soc.getInputStream());		//新しいObjectInputStreamを開ける
             	User dammy = (User) ois.readObject();		//新しいOISを開けるためのdammyの取得
             	System.out.println("ダミー受信成功");
                 return true;
@@ -123,14 +128,14 @@ public class Client {
 	}
 
 	public void logoutRequest() {		//ログアウト
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("ログアウト");
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("ログアウト");
+		out.flush();
+		/*if(in.readLine().equals("true")) {
+			System.out.println("ログアウト成功");
+		}else {
+			System.out.println("ログアウト成功");
+		}*/
 	}
 
 	public void sendUserInformation(String job, String belong, ArrayList<String> group){		//アカウント情報転送
@@ -177,15 +182,16 @@ public class Client {
 			out.flush();
 			//ois = new ObjectInputStream(soc.getInputStream());
 			myuser = (User) ois.readObject();		//サーバから受け取った自分のUserオブジェクト
-			System.out.println("オブジェクト取得成功");
+			//ois.reset();
+			System.out.println("自分のUserオブジェクト取得成功");
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
-			System.out.println("オブジェクト取得失敗");
+			System.out.println("自分のUserオブジェクト取得失敗");
 		} catch (ClassNotFoundException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
-			System.out.println("オブジェクト取得失敗");
+			System.out.println("自分のUserオブジェクト取得失敗");
 		}
 	}
 
@@ -196,7 +202,7 @@ public class Client {
 			out.println(group);
 			out.println(explanation);
 			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 			String s = in.readLine();
 			System.out.println(s);
 			if(s.indexOf("y")==0) {						//yが混入した場合のy除去処理
@@ -233,6 +239,7 @@ public class Client {
 			//soc.getInputStream().skip(100);
 			//ois = new ObjectInputStream(soc.getInputStream());
 			mygroup = (Group) ois.readObject();
+			//ois.reset();
 			System.out.println("グループ取得成功");
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
@@ -246,18 +253,23 @@ public class Client {
 	}
 
 	public void sendQuestion(String question/*質問内容*/, String group/*質問の属するグループ*/,  int coin) {		//質問の送信
-		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-		out.println("質問内容");
-		out.println(question);				//質問内容の送信
-		out.println(group);					//質問の属するグループ名の送信
-		out.println(coin);					//質問にかけられたコイン数の送信
-		out.flush();
+		if(coin<100) {
+			String s = "かけるコインの下限は１００コインです";
+			System.out.println(s);
+		}else {
+			//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+			out.println("質問内容");
+			out.println(question);				//質問内容の送信
+			out.println(group);					//質問の属するグループ名の送信
+			out.println(coin);					//質問にかけられたコイン数の送信
+			out.flush();
+		}
 	}
 
 	public void sendOffer(String question/*質問内容*/, String answerer/*オファーを出す相手*/) {		//オファーの送信
 		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-		out.println(question);		//どの質問に対するオファーかを識別するためのキー（質問内容）の送信
 		out.println(answerer);
+		out.println(question);		//どの質問に対するオファーかを識別するためのキー（質問内容）の送信
 		out.flush();
 	}
 
@@ -267,7 +279,7 @@ public class Client {
 			out.println("自分がした質問");
 			//out.println(name);		//誰の質問かを判別するためのキー（自分の名前）の送信
 			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 			String s1 = in.readLine();
 			System.out.println(s1);
 			if(s1.indexOf("y")==0) {						//yが混入した場合のy除去処理
@@ -280,11 +292,12 @@ public class Client {
 //in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 //String s2 = in.readLine();
 //System.out.println(s2+"　2回目");
-			ois = new ObjectInputStream(soc.getInputStream());
+			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ois = new ObjectInputStream(soc.getInputStream());
 				myquestion.add((Question) ois.readObject());
 			}
+			//ois.reset();
 			System.out.println("自分がした質問の受け取り成功");
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
@@ -301,12 +314,21 @@ public class Client {
 			out.println("オファー来てるかな");
 			out.flush();
 			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			int num = Integer.parseInt(in.readLine());
-			ois = new ObjectInputStream(soc.getInputStream());
+			String s1 = in.readLine();
+			System.out.println(s1);
+			if(s1.indexOf("y")==0) {						//yが混入した場合のy除去処理
+				StringBuffer sb = new StringBuffer(s1);
+				sb.deleteCharAt(0);
+				s1 = sb.toString();
+			}
+			System.out.println(s1);
+			int num = Integer.parseInt(s1);
+			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
 				myoffer.add((Question)ois.readObject());
 			}
+			//ois.reset();
 			System.out.println("自分に来ているオファーの受け取り成功");
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
@@ -322,12 +344,21 @@ public class Client {
 			out.println("立候補してる質問");
 			out.flush();
 			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-			int num = Integer.parseInt(in.readLine());
-			ois = new ObjectInputStream(soc.getInputStream());
+			String s1 = in.readLine();
+			System.out.println(s1);
+			if(s1.indexOf("y")==0) {						//yが混入した場合のy除去処理
+				StringBuffer sb = new StringBuffer(s1);
+				sb.deleteCharAt(0);
+				s1 = sb.toString();
+			}
+			System.out.println(s1);
+			int num = Integer.parseInt(s1);
+			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
 				mycandidacy.add((Question)ois.readObject());
 			}
+			//ois.reset();
 			System.out.println("自分が立候補した質問の受け取り成功");
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
@@ -339,87 +370,57 @@ public class Client {
 	}
 
 	public void sendAnswer(String question/*質問内容*/, String answer/*回答内容*/) {		//回答の送信
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("回答");
-			out.println(answer);
-			out.println(question);
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("回答");
+		out.println(answer);
+		out.println(question);
+		out.flush();
 	}
 
 	public void Candidacy(String question/*質問内容*/) {		//立候補
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("回答立候補");
-			out.println(question);		//立候補する質問の内容の送信
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("回答立候補");
+		out.println(question);		//立候補する質問の内容の送信
+		out.flush();
 	}
 
 	public void cancelCandidacy(String question) {		//自分がした立候補の取り消し
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("立候補取り消し");
-			out.println(question);		//立候補を取り消す質問の内容の送信
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("立候補取り消し");
+		out.println(question);		//立候補を取り消す質問の内容の送信
+		out.flush();
 
 	}
 
 	public void sendValue(String question/*質問内容*/, double value/*評価値*/) {		//評価値の送信
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("評価値変更");
-			out.println(question);
-			out.println(value);
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("評価値変更");
+		out.println(question);
+		out.println(value);
+		out.flush();
 	}
 
 	public void cancelOffer(String question/*質問内容*/) {		//オファー取り消し
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("オファー取り消し");
-			out.println(question);
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("オファー取り消し");
+		out.println(question);
+		out.flush();
 	}
 
 	public void refuseOffer(String question/*質問内容*/) {		//オファー拒否
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("オファー拒否");
-			out.println(question);
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("オファー拒否");
+		out.println(question);
+		out.flush();
 	}
 
 	public String receiveMessage() {		//メッセージ受信
 		String mes;
 		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+			//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
 			out.println("メッセージ受信");
 			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 			mes = in.readLine();
 			return mes;
 		} catch (IOException e) {
@@ -430,24 +431,19 @@ public class Client {
 	}
 
 	public void sendCoin(int coin) {		//送金
-		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
-			out.println("送金");
-			out.println(coin);
-			out.flush();
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
+		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("送金");
+		out.println(coin);
+		out.flush();
 	}
 
 	public int receiveCoin() {		//着金
 		int c;
 		try {
-			out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+			//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
 			out.println("着金");
 			out.flush();
-			in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+			//in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 			c = Integer.parseInt(in.readLine());
 			return c;
 		} catch (IOException e) {
@@ -513,7 +509,7 @@ public class Client {
 
 		Client client2 = new Client();
 		if(client2.connectServer()==true) {
-			System.out.println("サーバと接続できました");
+			//System.out.println("サーバと接続できました");
 			if(client2.accountRequest("ub", "ub", "ふたりめ")==true) {
 				if(client2.creatGroup("東京大学", "東大生のグループです")==true && client2.creatGroup("横浜国立大学", "横国生のグループです")==true) {
 					//System.out.println("");
@@ -524,9 +520,7 @@ public class Client {
 				}else {
 					System.out.println("グループ作成失敗");
 				}
-			}else {
-				System.out.println("アカウント作成失敗");
-			}
+
 
 			client2.receiveUserInformation("ub");
 			User myuser2 = client2.getMyUser();
@@ -537,9 +531,9 @@ public class Client {
 				System.out.println(s);
 			}
 
-			client2.sendQuestion("質問０", "横浜国立大学", 0);
-			client2.sendQuestion("質問１", "横浜国立大学", 0);
-			client2.sendQuestion("質問２", "東京大学", 0);
+			client2.sendQuestion("質問０", "横浜国立大学", 100);
+			client2.sendQuestion("質問１", "横浜国立大学", 100);
+			client2.sendQuestion("質問２", "東京大学", 100);
 
 			client2.receiveMyQuestion();
 			ArrayList<Question> myq = new ArrayList<Question>();
@@ -567,9 +561,21 @@ public class Client {
 				System.out.println(q.getQuestion());
 			}
 
-			client2.receiveUserInformation("ub");
+			client2.receiveUserInformation("ub");		//2回目の受け取りが成功するかの確認
 
-			client2.receiveMyQuestion();
+			client2.receiveMyQuestion();				//2回目の受け取りが成功するかの確認
+
+			//while(true) {
+
+			//}
+
+			client2.logoutRequest();
+
+			}else {
+				System.out.println("アカウント作成失敗");
+
+				client2.logoutRequest();
+			}
 
 
 		}
