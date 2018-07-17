@@ -259,15 +259,16 @@ public class Client {
 		}else {
 			//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
 			out.println("質問内容");
-			out.println(question);				//質問内容の送信
 			out.println(group);					//質問の属するグループ名の送信
 			out.println(coin);					//質問にかけられたコイン数の送信
+			out.println(question);				//質問内容の送信
 			out.flush();
 		}
 	}
 
-	public void sendOffer(String question/*質問内容*/, String answerer/*オファーを出す相手*/) {		//オファーの送信
+	public void sendOffer(String answerer/*質問内容*/, String question/*オファーを出す相手*/) {		//オファーの送信
 		//out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+		out.println("オファー人選出");
 		out.println(answerer);
 		out.println(question);		//どの質問に対するオファーかを識別するためのキー（質問内容）の送信
 		out.flush();
@@ -292,7 +293,7 @@ public class Client {
 //in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 //String s2 = in.readLine();
 //System.out.println(s2+"　2回目");
-			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
+			//ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ois = new ObjectInputStream(soc.getInputStream());
 				myquestion.add((Question) ois.readObject());
@@ -323,7 +324,7 @@ public class Client {
 			}
 			System.out.println(s1);
 			int num = Integer.parseInt(s1);
-			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
+			//ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
 				myoffer.add((Question)ois.readObject());
@@ -353,7 +354,7 @@ public class Client {
 			}
 			System.out.println(s1);
 			int num = Integer.parseInt(s1);
-			ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
+			//ois = new ObjectInputStream(soc.getInputStream());		//Questionクラスだけ、なぜかClassCastExceptionが出るため、新しくOISを開ける
 			for(int i=0; i<num; i++) {
 				//ObjectInputStream ois = new ObjectInputStream(soc.getInputStream());
 				mycandidacy.add((Question)ois.readObject());
