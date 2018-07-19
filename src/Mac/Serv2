@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Server {
+public class Ser5 {
 
 	private static int maxconnection = 1000000;//100人が最大接続人数
 
@@ -63,7 +63,7 @@ public class Server {
 
 	//コンストラクタ
 
-	public Server(int port) { //待ち受けポートを引数とする
+	public Ser5(int port) { //待ち受けポートを引数とする
 
 		this.port = port; //待ち受けポートを渡す
 
@@ -158,8 +158,12 @@ public class Server {
 
 							forwardMessage("ltrue", playerNo);
 							forwardMessage(String.valueOf(playerNo), playerNo);
+							
+							br[playerNo].readLine();
+							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
+							oos[playerNo].flush();
 
-							forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
+							//forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
 
 							hashA1.put(playerNo, a);
 							hashA2.put(a,playerNo );
@@ -190,7 +194,6 @@ public class Server {
 							forwardMessage("rtrue", playerNo);
 							forwardMessage(String.valueOf(playerNo), playerNo);
 							br[playerNo].readLine();
-							//out[playerNo].flush();
 							oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 							oos[playerNo].flush();
 							//br[playerNo].readLine();
@@ -198,7 +201,7 @@ public class Server {
 							//oos[playerNo].flush();
 							//forwarddammy(playerNo);		//新しいObjectoutputStreamを開けるために使用
 
-							System.out.println("ダミー送信成功");
+							//System.out.println("ダミー送信成功");
 
 							User user=obj(a);
 						} else {
@@ -222,9 +225,14 @@ public class Server {
 
 							forwardMessage("ftrue" , playerNo);
 							forwardMessage(str, playerNo);
+							
 
 						}else {
 							forwardMessage("ffalse",playerNo);
+							
+							
+							
+							
 						}
 
 					}
@@ -384,12 +392,10 @@ System.out.println("gtrue送信成功");
 System.out.println("グループ送信開始");
 						a = br[playerNo].readLine();//情報が欲しいグループ名
 						//そのグループのオブジェクトを取得させ送る。
-						if(chat(a)!=null) {
-
+							br[playerNo].readLine();
 							forwardgru(playerNo,chat(a));
-						}else {
-							forwardMessage("gfalse",playerNo);
-						}
+						
+						
 
 
 					}
@@ -489,7 +495,7 @@ System.out.println("グループ送信開始");
 							forwardMessage(String.valueOf(myo.size()), playerNo);
 
 							//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-
+							br[playerNo].readLine();
 							for(Question qu: myo) {
 								forwardq(playerNo,qu);
 								//flag++;
@@ -593,8 +599,9 @@ System.out.println(q.getQuestion());
 
 
 							//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-
+							br[playerNo].readLine();
 							for(Question qu: myq) {
+								
 								forwardq(playerNo,qu);
 							}
 
@@ -630,6 +637,7 @@ System.out.println(q.getQuestion());
 
 						q = (Question)inObject1.readObject();
 						ArrayList<User> ki=q.getCandidates();
+				
 						for(User u:ki) {
 							if(u.getName().equals(name)) {
 								myc.add(q);
@@ -647,7 +655,7 @@ System.out.println(q.getQuestion());
 							forwardMessage(String.valueOf(myc.size()), playerNo);
 
 							//oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
-
+							br[playerNo].readLine();
 							for(Question qu: myc) {
 								forwardq(playerNo,qu);
 								//flag++;
@@ -713,8 +721,12 @@ System.out.println(q.getQuestion());
 						User u=obj(a);
 						//out[playerNo].write(a);
 						out[playerNo].flush();
+						
+					    br[playerNo].readLine();
+						
+						
 						forwardu(playerNo, u);
-
+						
 						/*oos[playerNo] = new ObjectOutputStream(socket[playerNo].getOutputStream());
 						oos[playerNo].writeObject(u);
 
@@ -1782,7 +1794,7 @@ synchronized	public static boolean serch(String name) {//名前からグルー�
 	/////////////mainメソッド/////////////////////////////////////////////////
 public static void main(String[] args) { //main
 
-		Server server = new Server(10030); //待ち受けポート10000番でサーバオブジェクトを準備
+		Ser5 server = new Ser5(10030); //待ち受けポート10000番でサーバオブジェクトを準備
 
 
 		try {
@@ -1823,4 +1835,3 @@ public static void main(String[] args) { //main
 }
 
 }
-
