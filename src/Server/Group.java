@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Group implements Serializable{
-		String gname;//グループ名
-		static ArrayList<Question> chat = new ArrayList<Question>();
-		static ArrayList<User> member = new ArrayList<User>();
-		String intro=""; 
-		
+	private static final long serialVersionUID = 12L;
+		private String gname;//グループ名
+		private ArrayList<Question> chat = new ArrayList<Question>();
+		private ArrayList<User> member = new ArrayList<User>();
+		private String intro="";
+
 		Group(String gname,String intro,User user){
 			this.gname=gname;
 			this.intro=intro;
@@ -18,36 +19,42 @@ public class Group implements Serializable{
 		public String getgname() {
 			return gname;
 		}
-		
-		
-		public void setchat(Question bun) { 
+
+
+		public void setchat(Question bun) {
 			chat.add(bun);//チャット情報を保持するgroupに格納
-			
+
 			if(chat.size()>100) {
 				chat.remove(0);
-				
+
 			}
 		}
-		
-		public ArrayList getchat() {
-			
-			return chat; 
+
+		public ArrayList<Question> getchat() {
+
+			return chat;
 		}
-		
+
 		public void setmember(User user) {
 			member.add(user);
 		}
 		public void delmember(User user) {
-			member.remove(user);
+			User changeu=null;
+			for(User u: member) {
+				if(u.getName().equals(user.getName())) {
+					changeu = u;
+				}
+			}
+			member.remove(changeu);
 		}
-		public ArrayList getmember() {
+		public ArrayList<User> getmember() {
 			return member;
 		}
 		public String getintro() {
 			return intro;
 		}
-		
-		
+
+
 
 
 
