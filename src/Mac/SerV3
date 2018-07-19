@@ -261,7 +261,7 @@ public class Server {
 						int kazu=Integer.parseInt(c);
 
 						User u=obj(hashA1.get(playerNo));
-
+						ArrayList<Group> l=new ArrayList<Group>();
 						for(String s:obj(hashA1.get(playerNo)).getGroup()) {
 
 
@@ -281,6 +281,7 @@ public class Server {
 
 							if(g.getgname().equals(s)) {
 								g.delmember(u);
+								l.add(g);
 							}
 
 							}catch(java.io.EOFException e) {
@@ -302,7 +303,10 @@ public class Server {
 
 						}
 
-
+						for(Group k:l) {
+							gnew(k);
+						}
+						l.clear();
 
 
 						u.clearGroup();
@@ -323,6 +327,7 @@ public class Server {
 							if(g.getgname().equals(d)) {
 								g.setmember(obj(hashA1.get(playerNo)));
 								u.setGroup(g.getgname());
+								l.add(g);
 							}
 
 							}catch(java.io.EOFException e) {
@@ -345,7 +350,10 @@ public class Server {
 						hashD4.put(hashA1.get(playerNo),b);//要素の置き換え
 						hashC4.put(hashA1.get(playerNo),u.getGroup());
 
-
+						for(Group k:l) {
+							gnew(k);
+						}
+						
 
 						unew(u);//ファイルの中身の書き換え
 						Uhyouzi();
@@ -360,7 +368,7 @@ public class Server {
 						a = br[playerNo].readLine();//グループ名//同じ名前はだめにしようと思っている
 						b = br[playerNo].readLine();//グループの説明文
 						Group g=new Group(a,b,obj(hashA1.get(playerNo)));
-
+						User u=obj(hashA1.get(playerNo));
 						if(serch(a)) {
 							forwardMessage("gfalse",playerNo);
 System.out.println("gfalse送信成功");
@@ -368,11 +376,13 @@ System.out.println("gfalse送信成功");
 						}else {
 							forwardMessage("gtrue",playerNo);
 System.out.println("gtrue送信成功");
+	u.setGroup(a);
 //							FileOutputStream outFile = new FileOutputStream("Group.obj");
 //							ObjectOutputStream outObject = new ObjectOutputStream(outFile);
 //							outObject.writeObject(a);
 //							outObject.close();
 //							outFile.close();
+							unew(u);
 							gwrite(g);
 						}
 
@@ -1671,36 +1681,46 @@ synchronized	public static boolean serch(String name) {//名前からグルー�
 			}
 
 		}
-
-
-	public User obj(String name) {//userのオブジェクト生成、別にファイルを開いてもいいが、ファイルはなるべく開きたくないからハッシュで処理
+public User obj(String name) {//userのオブジェクト生成、別にファイルを開いてもいいが、ファイルはなるべく開きたくないからハッシュで処理
 
 
 
-		String pass=hashD1.get(name);
-		String ai=hashD5.get(name);
-		String job=hashD3.get(name);
-		String belong=hashD4.get(name);
-		double eval=hashC1.get(name);
-		int qcount=hashC2.get(name);
-		int acount=hashC3.get(name);
-		ArrayList<String> gru=hashC4.get(name);
-		User pl=new User(name,pass,ai);
-		pl.setJob(job);
-		pl.setBelong(belong);
-		pl.setValue(eval);
-		pl.setQuestion();
-		pl.setAnswer();
-		pl.decAnswer(acount);
-		pl.decQuestion(qcount);
-		pl.clearGroup();
-		for(String s:gru) {
-		pl.setGroup(s);
+		User u;
+		try {
+		FileInputStream inFile1 = new FileInputStream("User.obj");
+		ObjectInputStream inObject1 = new ObjectInputStream(inFile1);
+
+
+
+		try {
+
+		while(true) {
+			u= (User)inObject1.readObject();
+			
+			if(u.getName().equals(name)) {
+			return u;
+			}
 		}
-		unew(pl);
+		}catch(java.io.EOFException e) {
 
-		return pl;
 
+
+			inObject1.close();
+			inFile1.close();
+
+		}
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+
+
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		return null;
+
+		
 
 	}
 	/////////////////////////////サーバー用のメソッド//////////////////////////////////////////////
