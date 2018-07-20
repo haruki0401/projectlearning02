@@ -29,6 +29,22 @@ public class Group implements Serializable{
 
 			}
 		}
+		
+		public void changechat(Question o) {//質問を受け取ってその内容のオブジェクトを書き換える
+			Question q=null;
+			
+			for(Question l: chat) {
+				if(l.getQuestion().equals(o.getQuestion())) {
+					q = l;
+				}
+			}
+			chat.remove(q);
+			chat.add(o);
+		
+		
+		
+		}
+		
 
 		public ArrayList<Question> getchat() {
 
