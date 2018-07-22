@@ -214,6 +214,16 @@ import java.util.HashMap;
                             }
 
                         }
+                        if(inputLine.equals("立候補取り消し")) {
+						a=br[playerNo].readLine();//質問内容の受信
+						String name=hashA1.get(playerNo);
+						Question q=ques(a);
+						q.delCandidates(obj(name));
+						qnew(q);
+
+						
+
+                        }
 
                         if(inputLine.equals("忘れた人")) {
 
