@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical"
+    tools:context=".ReturnAnswerActivity">
+
+    <TextView
+        android:id="@+id/questioner_name_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <TextView
+        android:id="@+id/question_content_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/frame_style"
+        android:gravity="top|left"
+        android:paddingLeft="10dp"
+        android:paddingRight="20dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/orei_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/image_button6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginBottom="10dp"
+        android:text="@string/image" />
+
+    <EditText
+        android:id="@+id/return_text"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/frame_style"
+        android:gravity="top|left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/reject_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reject" />
+
+        <Button
+            android:id="@+id/attach2_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/attach" />
+
+        <Button
+            android:id="@+id/return_answer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send_answer" />
+    </LinearLayout>
+</LinearLayout>

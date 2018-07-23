@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    android:orientation="vertical"
+    tools:context=".CheckCandActivity">
+
+    <TextView
+        android:id="@+id/questioner_check_text"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/question_check_text"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/frame_style"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/image_button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/image" />
+
+    <Button
+        android:id="@+id/cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="10dp"
+        android:text="立候補をキャンセルする" />
+
+</LinearLayout>

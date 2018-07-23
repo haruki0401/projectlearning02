@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".OfferAppActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="＜質問内容＞" />
+
+        <TextView
+            android:id="@+id/question_offer_text"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:background="@drawable/frame_style"
+            android:padding="10dp"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/image_button5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginBottom="10dp"
+            android:text="@string/image" />
+
+        <TextView
+            android:text="立候補者(クリックでオファー送信)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"/>
+
+        <ListView
+            android:id="@+id/candidated_person_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/frame_style"></ListView>
+
+        <Button
+            android:id="@+id/turn_down_que_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="質問を取り下げる"
+            android:layout_gravity="right"/>
+
+    </LinearLayout>
+
+</LinearLayout>

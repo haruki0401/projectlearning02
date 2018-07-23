@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    android:orientation="vertical"
+    tools:context=".AnswerCheckActivity">
+
+    <TextView
+        android:id="@+id/asked_teacher_name_text"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
+    <TextView
+        android:id="@+id/asked_quesiton_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@drawable/frame_style" />
+
+    <Button
+        android:id="@+id/watch_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/image" />
+
+    <Button
+        android:id="@+id/turn_down_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="10dp"
+        android:text="取り下げる" />
+
+</LinearLayout>
